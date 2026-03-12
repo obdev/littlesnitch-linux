@@ -67,41 +67,41 @@ const ETHER_TYPE_IPV4: u16 = 0x0800;
 const ETHER_TYPE_IPV6: u16 = 0x86DD;
 const _ETHER_TYPE_ARP: u16 = 0x0806;
 
-#[cgroup_sock(sock_create)]
+#[cgroup_sock(sock_create)] // since Linux 4.10
 pub fn cgroup_sock_create(ctx: SockContext) -> i32 {
     let cookie = unsafe { bpf_get_socket_cookie(ctx.sock as _) };
     socket_properties::socket_opened(cookie);
     SK_PASS as _
 }
 
-#[cgroup_sock(sock_release)]
+#[cgroup_sock(sock_release)] // since Linux 4.10
 pub fn cgroup_sock_release(ctx: SockContext) -> i32 {
     let cookie = unsafe { bpf_get_socket_cookie(ctx.sock as _) };
     socket_properties::socket_closed(cookie);
     SK_PASS as _
 }
 
-#[cgroup_sock_addr(connect4)]
+#[cgroup_sock_addr(connect4)] // since Linux 4.17
 pub fn cgroup_sock_addr_connect4(ctx: SockAddrContext) -> i32 {
     handle_sock_addr(ctx.sock_addr, false, false)
 }
 
-#[cgroup_sock_addr(connect6)]
+#[cgroup_sock_addr(connect6)] // since Linux 4.17
 pub fn cgroup_sock_addr_connect6(ctx: SockAddrContext) -> i32 {
     handle_sock_addr(ctx.sock_addr, true, false)
 }
 
-#[cgroup_sock_addr(sendmsg4)]
+#[cgroup_sock_addr(sendmsg4)] // since Linux 4.17
 pub fn cgroup_sock_addr_sendmsg4(ctx: SockAddrContext) -> i32 {
     handle_sock_addr(ctx.sock_addr, false, true)
 }
 
-#[cgroup_sock_addr(sendmsg6)]
+#[cgroup_sock_addr(sendmsg6)] // since Linux 4.17
 pub fn cgroup_sock_addr_sendmsg6(ctx: SockAddrContext) -> i32 {
     handle_sock_addr(ctx.sock_addr, true, true)
 }
 
-#[fentry(function = "bprm_execve")]
+#[fentry(function = "bprm_execve")] // since Linux 5.5
 pub fn fentry_bprm_execve(ctx: FEntryContext) -> i32 {
     // We have very special requirements for our interception point: The kernel must have the
     // executable file open so that we have access to a `struct dentry` because we need the
@@ -130,14 +130,14 @@ pub fn fentry_bprm_execve(ctx: FEntryContext) -> i32 {
     0 // return value is ignored
 }
 
-#[fexit(function = "bprm_execve")]
+#[fexit(function = "bprm_execve")] // since Linux 5.5
 pub fn fexit_bprm_execve(ctx: FExitContext) -> i32 {
     let return_value: i32 = ctx.arg(1);
     report_exec_success(return_value);
     0 // return value is ignored
 }
 
-#[tracepoint]
+#[tracepoint] // since Linux 4.7
 pub fn tracepoint_sched_process_exec(ctx: TracePointContext) -> i32 {
     _ = handle_sched_process_exec(ctx);
     0
@@ -147,7 +147,7 @@ pub fn tracepoint_sched_process_exec(ctx: TracePointContext) -> i32 {
     // field:pid_t old_pid;	offset:16;	size:4;	signed:1;
 }
 
-#[tracepoint]
+#[tracepoint] // since Linux 4.7
 pub fn tracepoint_sched_process_fork(ctx: TracePointContext) -> i32 {
     _ = handle_sched_process_fork(ctx);
     0
@@ -158,7 +158,7 @@ pub fn tracepoint_sched_process_fork(ctx: TracePointContext) -> i32 {
     // field:pid_t child_pid;	offset:20;	size:4;	signed:1;
 }
 
-#[tracepoint]
+#[tracepoint] // since Linux 4.7
 pub fn tracepoint_sched_process_exit(ctx: TracePointContext) -> i32 {
     _ = handle_sched_process_exit(ctx);
     0
@@ -195,12 +195,12 @@ pub fn tracepoint_sys_exit_fsmount(_ctx: TracePointContext) -> i32 {
 
 */
 
-#[cgroup_skb]
+#[cgroup_skb] // linux 4.10
 pub fn cgroup_skb_transmit(ctx: SkBuffContext) -> i32 {
     handle_packet(ctx, false)
 }
 
-#[cgroup_skb]
+#[cgroup_skb] // linux 4.10
 pub fn cgroup_skb_receive(ctx: SkBuffContext) -> i32 {
     handle_packet(ctx, true)
 }
