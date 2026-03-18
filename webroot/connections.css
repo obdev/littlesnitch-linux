@@ -86,7 +86,7 @@
 /* ------------------------------------------ */
 .total-bytes {
   font-size: 12px;
-  padding: 3px 7px;
+  padding: 3px 7px 3px 0;
   width: 6em;
   flex-shrink: 0;
   text-align: right;
@@ -124,6 +124,7 @@
   cursor: pointer;
   overflow: hidden;
   white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .rule-button:hover {
@@ -142,6 +143,7 @@
   cursor: pointer;
   overflow: hidden;
   white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .details-button:hover {
@@ -149,7 +151,7 @@
 }
 
 .details-button svg {
-  width: 24px;
+  width: 15px;
   height: 24px;
 }
 
