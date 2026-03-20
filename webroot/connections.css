@@ -6,23 +6,26 @@
 /* ------------------------------------------ */
 .row {
   display: flex;
-  font-size: 14px;
+  font-size: var(--font-body);
   align-items: center;
-  height: 32px;
+  height: var(--row-h);
   padding: 0 8px;
   box-sizing: border-box;
-  border-bottom: 1px solid #e0e0e0;
-  background: var(--row-bg, #fff);
+  border-bottom: 1px solid var(--line);
+  background: transparent;
   transition: height 0.5s ease, opacity 0.5s ease;
 }
 
 .row:hover {
-  background: #f5f5f5;
+  background: var(--row-hover-bg);
+  border-radius: 6px;
+  border-bottom-color: transparent;
 }
 
-
 .row.selected {
-  background: #ddd;
+  background: var(--row-selected-bg);
+  border-radius: 6px;
+  border-bottom-color: transparent;
 }
 
 /* ------------------------------------------ */
@@ -85,7 +88,7 @@
 /* Statistics */
 /* ------------------------------------------ */
 .total-bytes {
-  font-size: 12px;
+  font-size: var(--font-meta);
   padding: 3px 7px 3px 0;
   width: 6em;
   flex-shrink: 0;
@@ -93,7 +96,7 @@
 }
 
 .last-event {
-  font-size: 12px;
+  font-size: var(--font-meta);
   padding: 3px 7px;
   width: 7em;
   flex-shrink: 0;
@@ -160,7 +163,7 @@
 /* ------------------------------------------ */
 .row-inspector .info-line {
   margin: 0 0 6px 0;
-  font-size: 13px;
+  font-size: var(--font-default);
 }
 
 .row-inspector .field {
@@ -198,13 +201,13 @@
 .row-inspector {
   border: 1px solid var(--line);
   border-radius: 8px;
-  background: #fff;
+  background: var(--surface);
   padding: 10px;
 }
 
 .covering-rules-headline,
 .related-rules-headline {
-  font-size: 12px;
+  font-size: var(--font-meta);
   font-weight: 600;
   color: var(--text-muted);
   text-transform: uppercase;
@@ -227,7 +230,7 @@
 
 .emoji {
   margin-right: 0;
-  font-size: 13px;
+  font-size: var(--font-default);
 }
 
 .process {
@@ -293,12 +296,12 @@
 }
 
 .inactive {
-  font-size: 11px;
+  font-size: var(--font-micro);
   opacity: 0.72;
 }
 
 .inactive .emoji {
-  font-size: 11px;
+  font-size: var(--font-micro);
 }
 
 #rules input[type="checkbox"] {

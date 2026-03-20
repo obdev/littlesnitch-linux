@@ -5,13 +5,13 @@
   flex-shrink: 0;
   height: 8px;
   cursor: row-resize;
-  background: linear-gradient(180deg, #e8edf7 0%, #dce3f2 50%, #e8edf7 100%);
-  border-top: 1px solid #d2d9ea;
-  border-bottom: 1px solid #d2d9ea;
+  background: linear-gradient(180deg, var(--surface-muted) 0%, var(--line) 50%, var(--surface-muted) 100%);
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
 }
 
 .h-splitter:hover {
-  background: linear-gradient(180deg, #dce8f6 0%, #c6d8ef 50%, #dce8f6 100%);
+  background: linear-gradient(180deg, var(--row-selected-bg) 0%, var(--accent-soft) 50%, var(--row-selected-bg) 100%);
 }
 
 .traffic-chart-wrap {
@@ -29,7 +29,7 @@
   bottom: 6px;
   right: 8px;
   z-index: 10;
-  font-size: 11px;
+  font-size: var(--font-micro);
   padding: 2px 4px;
   border: 1px solid var(--line);
   border-radius: 4px;
@@ -54,7 +54,7 @@
   align-items: center;
   gap: 4px;
   font: inherit;
-  font-size: 11px;
+  font-size: var(--font-micro);
   padding: 2px 6px;
   border: 1px solid #4a90d9;
   border-radius: 4px;
@@ -68,7 +68,7 @@
   background: none;
   cursor: pointer;
   padding: 0 1px;
-  font-size: 13px;
+  font-size: var(--font-default);
   line-height: 1;
   color: #1a5a9a;
   opacity: 0.7;
@@ -100,7 +100,7 @@
   align-items: center;
   gap: 4px;
   font: inherit;
-  font-size: 11px;
+  font-size: var(--font-micro);
   padding: 2px 4px;
   border: 1px solid #4a90d9;
   border-radius: 4px;
@@ -109,3 +109,7 @@
   box-sizing: border-box;
   vertical-align: middle;
 }
+
+/* Override uPlot's hardcoded crosshair color to respect dark mode */
+.u-hz .u-cursor-x { border-right-color: var(--text-muted); }
+.u-hz .u-cursor-y { border-bottom-color: var(--text-muted); }

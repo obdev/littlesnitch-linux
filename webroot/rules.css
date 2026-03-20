@@ -2,7 +2,7 @@
 /* Copyright (C) 2026 Objective Development Software GmbH */
 
 #rules-list {
-  padding: 0;
+  padding: 0 3px;
 }
 
 .rules-table {
@@ -10,7 +10,7 @@
   border-collapse: separate;
   border-spacing: 0;
   table-layout: fixed;
-  font-size: 13px;
+  font-size: var(--font-default);
   user-select: none;
   -webkit-user-select: none;
 }
@@ -18,23 +18,29 @@
 .rules-table th,
 .rules-table td {
   border-bottom: 1px solid var(--line);
-  padding: 8px 6px;
+  padding: 0 6px;
   vertical-align: middle;
   text-align: left;
+  box-sizing: border-box;
 }
 
 .rules-table th {
+  height: var(--pane-hdr-h);
   position: sticky;
   top: 0;
-  background: #f8fbff;
+  background: var(--surface-muted);
   background-clip: padding-box;
   color: var(--text-muted);
-  font-size: 12px;
+  font-size: var(--font-meta);
   text-transform: uppercase;
   letter-spacing: 0.03em;
   z-index: 3;
   box-shadow: inset 0 -1px 0 var(--line);
   white-space: nowrap;
+}
+
+.rules-table td {
+  height: var(--row-h);
 }
 
 .rules-sortable-header {
@@ -47,7 +53,7 @@
   text-align: center;
   margin-left: 4px;
   vertical-align: baseline;
-  font-size: 10px;
+  font-size: var(--font-micro);
   color: #9aa6be;
   font-weight: 500;
   line-height: 1em;
@@ -80,6 +86,48 @@
   width: 15%;
 }
 
+.rules-table th:nth-child(7),
+.rules-table td:nth-child(7) {
+  width: 52px;
+  text-align: right;
+  padding: 0 4px 0 0;
+}
+
+.rule-row-actions {
+  display: flex;
+  gap: 1px;
+  justify-content: flex-end;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 100ms ease;
+}
+
+.rules-table tbody tr:hover .rule-row-actions {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.rule-row-btn {
+  border: none;
+  background: none;
+  cursor: pointer;
+  padding: 3px 5px;
+  border-radius: 4px;
+  font-size: var(--font-body);
+  color: var(--text-muted);
+  line-height: 1;
+}
+
+.rule-row-btn:hover {
+  background: var(--surface-muted);
+  color: var(--text);
+}
+
+.rule-row-btn-danger:hover {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
 .rules-table td:nth-child(2),
 .rules-table td:nth-child(3),
 .rules-table td:nth-child(4),
@@ -90,21 +138,33 @@
   text-overflow: ellipsis;
 }
 
-.rules-table tbody tr:hover {
-  background: #f6faff;
-}
-
 .rules-table:focus,
 .rules-table *:focus {
   outline: none;
 }
 
-.rules-table tbody tr.is-selected {
-  background: #eaf3ff;
+.rules-table tbody tr:hover > td {
+  background: var(--row-hover-bg);
+  border-bottom-color: transparent;
 }
 
-.rules-table tbody tr.is-selected:hover {
-  background: #dcecff;
+.rules-table tbody tr.is-selected > td {
+  background: var(--row-selected-bg);
+  border-bottom-color: transparent;
+}
+
+.rules-table tbody tr.is-selected:hover > td {
+  background: var(--row-selected-hover-bg);
+}
+
+.rules-table tbody tr:hover > td:first-child,
+.rules-table tbody tr.is-selected > td:first-child {
+  border-radius: 6px 0 0 6px;
+}
+
+.rules-table tbody tr:hover > td:last-child,
+.rules-table tbody tr.is-selected > td:last-child {
+  border-radius: 0 6px 6px 0;
 }
 
 .rules-table .rule-high-priority td {
@@ -163,12 +223,12 @@
 .rule-inspector-card {
   border: 1px solid var(--line);
   border-radius: 8px;
-  background: #fff;
+  background: var(--surface);
   padding: 10px;
 }
 
 .rule-inspector-headline {
-  font-size: 13px;
+  font-size: var(--font-default);
   font-weight: 700;
   margin-bottom: 8px;
 }
@@ -191,7 +251,7 @@
   min-width: 120px;
   text-align: right;
   color: var(--text-muted);
-  font-size: 12px;
+  font-size: var(--font-meta);
   font-weight: 600;
 }
 
@@ -202,7 +262,7 @@
 
 .rule-inspector-value {
   color: var(--text);
-  font-size: 13px;
+  font-size: var(--font-default);
   overflow-wrap: anywhere;
 }
 
@@ -212,7 +272,7 @@
 
 .rule-inspector-box-headline {
   color: var(--text-muted);
-  font-size: 12px;
+  font-size: var(--font-meta);
   font-weight: 600;
   margin-bottom: 4px;
 }
@@ -220,11 +280,11 @@
 .rule-inspector-box {
   border: 1px solid var(--line);
   border-radius: 6px;
-  background: #f9fbff;
+  background: var(--surface-muted);
   padding: 8px;
   white-space: pre-wrap;
   overflow-wrap: anywhere;
-  font-size: 13px;
+  font-size: var(--font-default);
 }
 
 .rule-inspector-notes-input {
@@ -236,7 +296,7 @@
   min-height: 76px;
   font: inherit;
   color: var(--text);
-  background: #fff;
+  background: var(--surface);
 }
 
 .rule-inspector-notes-input.is-search-match {

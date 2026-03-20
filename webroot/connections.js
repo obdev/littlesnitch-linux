@@ -36,8 +36,7 @@ function byteCountString(bytes) {
   const divisors = [1e3, 1e6, 1e9, 1e12];
   let i = units.length - 1;
   while (i > 0 && bytes < divisors[i]) i--;
-  const ratio = bytes / divisors[i];
-  return (ratio < 1 ? ratio.toFixed(3) : ratio.toPrecision(3)) + ' ' + units[i];
+  return (bytes / divisors[i]).toPrecision(3) + ' ' + units[i];
 }
 
 // Human-readable "time ago" string in 10-second resolution

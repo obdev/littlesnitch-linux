@@ -914,10 +914,7 @@ function setupRulesHeaderButtons() {
     return;
   }
 
-  let editButton = title.querySelector('[data-role="edit-rule"]');
-  let addButton = title.querySelector('[data-role="add-rule"]');
-  let deleteButton = title.querySelector('[data-role="delete-rules"]');
-  if (!editButton || !addButton || !deleteButton) {
+  if (!title.querySelector('[data-role="add-rule"]')) {
     title.classList.add('blocklist-pane-title');
 
     const label = document.createElement('span');
@@ -929,27 +926,7 @@ function setupRulesHeaderButtons() {
     actions.className = 'blocklist-pane-actions';
     title.appendChild(actions);
 
-    editButton = document.createElement('button');
-    editButton.type = 'button';
-    editButton.className = 'blocklist-add-button';
-    editButton.setAttribute('data-role', 'edit-rule');
-    editButton.setAttribute('aria-label', 'Edit selected rule');
-    editButton.title = 'Edit selected rule';
-    editButton.textContent = '✎';
-    editButton.addEventListener('click', () => {
-      if (selectedRuleIds.size !== 1) {
-        return;
-      }
-      const selectedId = Array.from(selectedRuleIds)[0];
-      const selectedRule = rulesCurrentList.find((rule) => rule.id === selectedId);
-      if (!selectedRule) {
-        return;
-      }
-      openRuleModal(selectedRule);
-    });
-    actions.appendChild(editButton);
-
-    addButton = document.createElement('button');
+    const addButton = document.createElement('button');
     addButton.type = 'button';
     addButton.className = 'blocklist-add-button';
     addButton.setAttribute('data-role', 'add-rule');
@@ -960,25 +937,7 @@ function setupRulesHeaderButtons() {
       openRuleModal(null);
     });
     actions.appendChild(addButton);
-
-    deleteButton = document.createElement('button');
-    deleteButton.type = 'button';
-    deleteButton.className = 'blocklist-add-button';
-    deleteButton.setAttribute('data-role', 'delete-rules');
-    deleteButton.setAttribute('aria-label', 'Delete selected rules');
-    deleteButton.title = 'Delete selected rules';
-    deleteButton.textContent = '-';
-    deleteButton.addEventListener('click', () => {
-      if (selectedRuleIds.size === 0 || !window.app || typeof window.app.sendAction !== 'function') {
-        return;
-      }
-      window.app.sendAction('deleteRules', { ruleIds: Array.from(selectedRuleIds) });
-    });
-    actions.appendChild(deleteButton);
   }
-
-  editButton.disabled = selectedRuleIds.size !== 1;
-  deleteButton.disabled = selectedRuleIds.size === 0;
 }
 
 function renderRuleTable(ruleList) {
@@ -993,6 +952,7 @@ function renderRuleTable(ruleList) {
     { title: 'Dir', sortKey: 'direction' },
     { title: 'Server', sortKey: 'remote' },
     { title: 'Port', sortKey: 'port' },
+    { title: '', sortKey: null },
   ];
   for (const column of columns) {
     const th = document.createElement('th');
@@ -1083,6 +1043,35 @@ function renderRuleTable(ruleList) {
     setHighlightedText(protocolPortCell, protocolPort.length > 0 ? protocolPort : '');
     protocolPortCell.title = protocolPort;
     row.appendChild(protocolPortCell);
+
+    const actionsCell = document.createElement('td');
+    actionsCell.className = 'rule-row-actions';
+
+    const editBtn = document.createElement('button');
+    editBtn.type = 'button';
+    editBtn.className = 'rule-row-btn';
+    editBtn.title = 'Edit rule';
+    editBtn.textContent = '✎';
+    editBtn.addEventListener('click', (event) => {
+      event.stopPropagation();
+      openRuleModal(rule);
+    });
+    actionsCell.appendChild(editBtn);
+
+    const deleteBtn = document.createElement('button');
+    deleteBtn.type = 'button';
+    deleteBtn.className = 'rule-row-btn rule-row-btn-danger';
+    deleteBtn.title = 'Delete rule';
+    deleteBtn.textContent = '×';
+    deleteBtn.addEventListener('click', (event) => {
+      event.stopPropagation();
+      if (window.app && typeof window.app.sendAction === 'function') {
+        window.app.sendAction('deleteRules', { ruleIds: [rule.id] });
+      }
+    });
+    actionsCell.appendChild(deleteBtn);
+
+    row.appendChild(actionsCell);
 
     row.addEventListener('click', (event) => {
       updateRuleSelection(event, index, rule.id);

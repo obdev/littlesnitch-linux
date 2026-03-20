@@ -41,15 +41,23 @@
   </svg>
 
   <div class="app-shell">
-    <header class="tabs" role="tablist" aria-label="Sections">
-      <button class="tab is-active" role="tab" aria-selected="true" data-section="connections">Connections</button>
-      <button class="tab" role="tab" aria-selected="false" data-section="blocklists">Blocklists</button>
-      <button class="tab" role="tab" aria-selected="false" data-section="rules">Rules</button>
-      <div class="tabs-right-group">
-        <div class="offline-indicator" data-role="offline-indicator" hidden aria-live="polite">
-          Daemon offline — reconnecting…
-        </div>
-        <button class="about-button" type="button" aria-label="About Little Snitch for Linux" data-role="about-button">About</button>
+    <header class="app-header">
+      <div class="app-brand">
+        <span class="brand-name">Little Snitch</span> for <span class="brand-platform">Linux</span>
+      </div>
+      <button class="about-button" type="button" aria-label="About Little Snitch for Linux" data-role="about-button">ⓘ</button>
+      <div class="offline-indicator" data-role="offline-indicator" hidden aria-live="polite">
+        Daemon offline — reconnecting…
+      </div>
+      <div class="header-tabs" role="tablist" aria-label="Sections">
+        <button class="tab is-active" role="tab" aria-selected="true" data-section="connections">Connections</button>
+        <button class="tab" role="tab" aria-selected="false" data-section="blocklists">Blocklists</button>
+        <button class="tab" role="tab" aria-selected="false" data-section="rules">Rules</button>
+        <button class="theme-toggle" type="button" aria-label="Toggle dark mode" data-role="theme-toggle">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 3a9 9 0 1 0 9 9c0-.46-.04-.92-.1-1.36a5.389 5.389 0 0 1-4.4 2.26 5.403 5.403 0 0 1-3.14-9.8c-.44-.06-.9-.1-1.36-.1z"/>
+          </svg>
+        </button>
       </div>
     </header>
 
@@ -83,35 +91,53 @@
                 ×
               </button>
             </div>
-            <div class="connections-inline-filters">
-              <select class="menu-select compact" data-role="direction-filter" title="Direction filter">
-                <option value="both">In + Out</option>
-                <option value="out">Out only</option>
-                <option value="in">In only</option>
-              </select>
-              <select class="menu-select compact" data-role="location-filter" title="Location filter">
-                <option value="all">Internet + Local Networks</option>
-                <option value="internet">Internet only</option>
-                <option value="localnet">Local Networks only</option>
-                <option value="localhost">Local Host only</option>
-                <option value="everything">Everything</option>
-              </select>
-              <select class="menu-select compact" data-role="verdict-filter" title="Verdict filter">
-                <option value="any">Allowed + Denied</option>
-                <option value="allow">Allowed only</option>
-                <option value="deny">Denied only</option>
-              </select>
-              <select class="menu-select compact" data-role="visible-period-filter" title="Visible time period">
-                <option value="60">Show 1 minute</option>
-                <option value="600">Show 10 minutes</option>
-                <option value="3600">Show 1 hour</option>
-                <option value="21600">Show 6 hours</option>
-                <option value="86400">Show 1 day</option>
-                <option value="604800">Show 7 days</option>
-                <option value="2592000">Show 30 days</option>
-                <option value="none">Show all</option>
-              </select>
+            <div class="filter-control" data-role="filter-control">
+              <button class="filter-btn" type="button" data-role="filter-toggle" aria-haspopup="true" aria-expanded="false">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <line x1="4" y1="6" x2="20" y2="6"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="11" y1="18" x2="13" y2="18"/>
+                </svg>
+                <span class="filter-chips" data-role="filter-chips"></span>
+                <span class="filter-placeholder" data-role="filter-placeholder">Filter</span>
+              </button>
+              <div class="filter-popup" data-role="filter-popup" hidden>
+                <div class="filter-popup-row">
+                  <label class="filter-popup-label">Direction</label>
+                  <select class="menu-select" data-role="direction-filter">
+                    <option value="both">In + Out</option>
+                    <option value="out">Out only</option>
+                    <option value="in">In only</option>
+                  </select>
+                </div>
+                <div class="filter-popup-row">
+                  <label class="filter-popup-label">Location</label>
+                  <select class="menu-select" data-role="location-filter">
+                    <option value="all">Internet + Local Networks</option>
+                    <option value="internet">Internet only</option>
+                    <option value="localnet">Local Networks only</option>
+                    <option value="localhost">Local Host only</option>
+                    <option value="everything">Everything</option>
+                  </select>
+                </div>
+                <div class="filter-popup-row">
+                  <label class="filter-popup-label">Action</label>
+                  <select class="menu-select" data-role="verdict-filter">
+                    <option value="any">Allowed + Denied</option>
+                    <option value="allow">Allowed only</option>
+                    <option value="deny">Denied only</option>
+                  </select>
+                </div>
+              </div>
             </div>
+            <select class="menu-select compact" data-role="visible-period-filter" title="Visible time period">
+              <option value="60">Show 1 minute</option>
+              <option value="600">Show 10 minutes</option>
+              <option value="3600">Show 1 hour</option>
+              <option value="21600">Show 6 hours</option>
+              <option value="86400">Show 1 day</option>
+              <option value="604800">Show 7 days</option>
+              <option value="2592000">Show 30 days</option>
+              <option value="none">Show all</option>
+            </select>
 
             <span class="topbar-separator" aria-hidden="true"></span>
             <select class="menu-select compact" data-role="connections-sort" title="Sort">

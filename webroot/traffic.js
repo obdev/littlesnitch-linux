@@ -170,6 +170,9 @@
   function buildOpts(width, height) {
     const isRate = displayMode === "rate";
     const fmtY = isRate ? fmtRateAxis : fmtBytesAxis;
+    const cs = getComputedStyle(document.documentElement);
+    const textColor = cs.getPropertyValue("--text-muted").trim();
+    const gridColor = cs.getPropertyValue("--line").trim();
 
     const bytesSeries = isRate
       ? { paths: uPlot.paths.bars({ size: [1, Infinity] }), points: { show: false } }
@@ -184,11 +187,18 @@
         blocks: { auto: false },
       },
       axes: [
-        {},
+        {
+          stroke: textColor,
+          grid:  { stroke: gridColor },
+          ticks: { stroke: gridColor },
+        },
         {
           scale: "y",
           values: (_self, ticks) => ticks.map(fmtY),
           size: 72,
+          stroke: textColor,
+          grid:  { stroke: gridColor },
+          ticks: { stroke: gridColor },
         },
         {
           scale: "blocks",
@@ -197,6 +207,7 @@
           labelSize: 14,
           values: (_self, ticks) => ticks.map(v => v > 0 ? v.toFixed(0) : "0"),
           size: 50,
+          stroke: textColor,
           grid: { show: false },
           ticks: { show: false },
         },
@@ -466,6 +477,11 @@
     const { yMax, bMax } = computeTargetMaxes(display);
     setScaleDirect(yMax, bMax);
   }
+
+  // Rebuild when the theme changes so axis/grid colors are re-read from CSS variables.
+  new MutationObserver(() => {
+    if (uplot) rebuildPlot();
+  }).observe(document.documentElement, { attributes: true, attributeFilter: ["class"] });
 
   window.handleSetTrafficData = handleSetTrafficData;
   window.handleUpdateTrafficData = handleUpdateTrafficData;
