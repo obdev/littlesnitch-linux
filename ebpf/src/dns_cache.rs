@@ -8,6 +8,7 @@ use common::{
     NanoTime, StringId,
     dns_types::{DnsIpv4Key, DnsIpv6Key, DnsNameKey},
     flow_types::{IpAddress, ProcessPair},
+    repeat::{LoopReturn, repeat},
 };
 
 use crate::{
@@ -122,21 +123,15 @@ impl Context {
             }
             _ = DNS_QUERIES.insert(&name_key, &self.timestamp, 0);
         } else {
-            // TODO: collect statistics about max answer count. Since the eBPF verifier works
-            // on the unrolled loop here, the number of answers we accept has an impact on
-            // verification complexity.
-            let sane_answer_count = cmp::min(64, dns_msg_header.answer_count);
-            for _ in 0..sane_answer_count {
-                if self.parse_answer(
-                    &mut index,
-                    process_pair,
-                    self.timestamp,
-                    dns_msg_start_index,
-                ) == None
-                {
-                    break;
-                }
-            }
+            let sane_answer_count = cmp::min(64, dns_msg_header.answer_count) as u64;
+            let mut loop_ctx = DnsAnswerLoopCtx {
+                context: self,
+                index,
+                process_pair,
+                timestamp: self.timestamp,
+                dns_msg_start_index,
+            };
+            repeat(sane_answer_count, parse_answer_inner, &mut loop_ctx);
         }
     }
 
@@ -291,6 +286,31 @@ impl Context {
         let cname_key = DnsNameKey { name: cname };
         _ = DNS_CNAMES.insert(&cname_key, &query_name, 0);
         Some(())
+    }
+}
+
+struct DnsAnswerLoopCtx<'a> {
+    context: &'a Context,
+    index: usize,
+    process_pair: &'a ProcessPair,
+    timestamp: NanoTime,
+    dns_msg_start_index: u16,
+}
+
+extern "C" fn parse_answer_inner(_i: u64, ctx: &mut DnsAnswerLoopCtx) -> LoopReturn {
+    if ctx
+        .context
+        .parse_answer(
+            &mut ctx.index,
+            ctx.process_pair,
+            ctx.timestamp,
+            ctx.dns_msg_start_index,
+        )
+        .is_none()
+    {
+        LoopReturn::LoopBreak
+    } else {
+        LoopReturn::LoopContinue
     }
 }
 
