@@ -69,17 +69,6 @@ impl SubAssign for NanoTime {
     }
 }
 
-// Do not implement Copy so that we avoid implicit inefficient copying
-#[repr(C)]
-#[derive(Clone, Default, PartialEq, Eq)]
-#[cfg_attr(feature = "user", derive(Copy, Debug, Hash))]
-pub struct FileId {
-    pub inode_number: u64,
-    // The device is encoded as `(major << 20) | minor` (format used by Linux kernel)
-    pub device: u64,
-    // avoid any padding because FileId is used as map key
-}
-
 #[repr(C)]
 #[derive(PartialEq, Eq, Default, Clone, Copy)]
 pub struct NodeFeatures(pub BitSet);
@@ -136,7 +125,5 @@ pub fn touch_usize(_v: &mut usize) {
 unsafe impl aya::Pod for StringId {}
 #[cfg(feature = "user")]
 unsafe impl aya::Pod for NanoTime {}
-#[cfg(feature = "user")]
-unsafe impl aya::Pod for FileId {}
 #[cfg(feature = "user")]
 unsafe impl aya::Pod for NodeFeatures {}

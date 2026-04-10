@@ -12,7 +12,7 @@ use aya_ebpf::{
     maps::HashMap,
 };
 use common::{
-    FileId, StringId,
+    StringId,
     node_cache::{MAX_PATH_COMPONENTS, NodeCacheTrait, NodeId, PathNode, PathRep},
 };
 use core::ptr;
@@ -22,8 +22,11 @@ static NODE_ID_FOR_NODE: HashMap<PathNode, NodeId> = HashMap::with_max_entries(6
 #[map]
 static NODE_FOR_NODE_ID: HashMap<NodeId, PathNode> = HashMap::with_max_entries(65536, 0);
 
+// Keyed by mount ID (mnt_id from struct mount), which uniquely identifies each mounted filesystem
+// instance. We previously used inode number + device ID, but btrfs uses ephemeral device IDs
+// for subvolumes and there is no unique identifier available from userspace *and* kernel.
 #[map]
-static ROOT_NODES: HashMap<FileId, NodeId> = HashMap::with_max_entries(8192, 0);
+static ROOT_NODES: HashMap<u32, NodeId> = HashMap::with_max_entries(8192, 0);
 
 pub struct NodeCache {
     buffers: *mut StaticBuffers,
@@ -38,8 +41,16 @@ impl NodeCache {
 
 impl NodeCacheTrait<Path, StringAndZero> for NodeCache {
     fn root_node_id(&self, root_path: &Path) -> Option<NodeId> {
-        let file_id = root_path.dentry.file_id();
-        unsafe { ROOT_NODES.get(&file_id).cloned() }
+        unsafe {
+            let mut mnt_id: u32 = 0;
+            let mnt_id_ptr = vfsmount_mnt_id_ptr(root_path.mnt as _);
+            bpf_probe_read_kernel(
+                &mut mnt_id as *mut u32 as *mut c_void,
+                core::mem::size_of::<u32>() as u32,
+                mnt_id_ptr as *const c_void,
+            );
+            ROOT_NODES.get(&mnt_id).cloned()
+        }
     }
 
     fn id_for_node(&self, node: &PathNode) -> Option<NodeId> {
@@ -84,37 +95,38 @@ impl NodeCacheTrait<Path, StringAndZero> for NodeCache {
 // We currently obtain the path from a `struct path`, which represents a path within the mounted
 // file system. In order to get absolute paths, we maintain a list of mount points (`ROOT_NODES`)
 // and prepend the file system's mount point to the path's root.
-// We cannot reconstruct the absolute path because we don't have the mount point's dentry and
-// mnt_root. We only have `struct vfsmnt``, not `struct mnt`. `struct mnt` should be at a fixed
-// offset from `struct vfsmnt` (see Linux implementation of `prepend_path()` in `d_path.c``),
-// but that's hard to compute with BTF relocation. See the comment below for comments on how
-// a path is constructed.
+// In theory, we could reconstruct the absolte path by continuing at the mount point's dentry
+// within the parent mount. This requires access to `struct mount` where we only have
+// `struct vfsmount` from `struct path`. `struct vfsmount` is embedded in `struct mount`, and
+// the kernel uses `container_of()` to get from `struct vfsmount` to `struct mount` (see
+// Linux implementation of `prepend_path()` in `d_path.c`). We need to take that step anyway
+// to find `mnt_id` and it requires a bit of CO-RE acrobatics (see implementation of
+// `vfsmount_mnt_id_ptr()`). Obtaining an integer value via `bpf_probe_read_kernel()` is easy,
+// but not getting a CO-RE pointer to the parent `struct dentry`. So we rather stick with the
+// `ROOT_NODES` approach where the parent information comes from user space.
 
 pub struct Path {
     // References are static for the time our program runs.
     pub dentry: &'static dentry,
+    pub mnt: &'static vfsmount,
 }
 
 impl Path {
     pub fn new(path: &path) -> Self {
-        unsafe { Self { dentry: &*path_dentry(path as _) } }
+        unsafe {
+            Self {
+                dentry: &*path_dentry(path as _),
+                mnt: &*path_mnt(path as _),
+            }
+        }
     }
 }
 
 // This implementation of PathRep defines by what path an executable is identified. We choose
 // to work with `struct dentry` for executable identification, not with path strings which
-// would be available in `sched_process_exec()`, because they have all symlinks resolved.
-// Although we work with `realpath()` paths here (symlinks resolved), there may still be
-// ambiguities, in particular with bind mounts where the same directory is made available under
-// different paths. Bind mounts are used in various places in Linux, e.g. in order to create
-// a secure, isolated environment for untrusted processes or containers, so this is not an exotic
-// feature.
-// When an executable is visible multiple times via bind mounts, we prefer to report it at its
-// "main" path. This is also easier because we otherwise would have to follow bind mounts from
-// user space fast enough to have the mount point available in the `ROOT_NODES` map before any
-// process is exec'd on the mount.
-// By ignoring the `mnt.mnt_root` of Linux `struct path`, we always iterate up to the file system's
-// root, which should be the "main" mount point of the device.
+// would be available in `sched_process_exec()`, because dentry has all symlinks resolved.
+// We stop parent iteration when the dentry matches the mount's root dentry or when it is NULL.
+// This way we exactly reproduce the paths seen from user space.
 
 impl PathRep<StringAndZero> for Path {
     fn name_id(&self, buffer: *mut StringAndZero) -> StringId {
@@ -137,30 +149,13 @@ impl PathRep<StringAndZero> for Path {
     }
 
     fn parent(&self) -> Option<Self> {
-        // We could stop parent iteration at the next mount point here, but rather iterate up
-        // to the file system's root where no more parent nodes are available.
-        if let Some(parent) = unsafe { dentry_parent(self.dentry as *const _).as_ref() }
-            && !ptr::eq(parent, self.dentry)
+        let root_node = unsafe { vfsmount_root(self.mnt) };
+        if !ptr::eq(self.dentry, root_node)
+            && let Some(parent) = unsafe { dentry_parent(self.dentry as *const _).as_ref() }
         {
-            Some(Path { dentry: parent })
+            Some(Path { dentry: parent, mnt: self.mnt })
         } else {
             None
-        }
-    }
-}
-
-trait FileIdRep {
-    fn file_id(&self) -> FileId;
-}
-
-impl FileIdRep for &'static dentry {
-    fn file_id(&self) -> FileId {
-        let dentry = *self;
-        unsafe {
-            FileId {
-                inode_number: dentry_ino(dentry as _),
-                device: dentry_dev(dentry as _) as _,
-            }
         }
     }
 }

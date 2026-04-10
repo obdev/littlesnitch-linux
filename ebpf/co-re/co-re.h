@@ -15,9 +15,6 @@ typedef unsigned int __u32;
 typedef __u64 u64;
 typedef __u32 u32;
 
-typedef u32 __kernel_dev_t;
-typedef __kernel_dev_t dev_t;
-
 typedef unsigned int __kernel_uid32_t;
 typedef __kernel_uid32_t uid_t;
 
@@ -58,25 +55,23 @@ struct cred {
 	kgid_t fsgid;
 };
 
-struct super_block {
-	dev_t s_dev;
-};
-
-struct inode {
-	long unsigned int i_ino;
-};
-
 struct dentry {
-	struct inode *d_inode;
 	struct dentry *d_parent;
 	struct qstr d_name;
-	struct super_block *d_sb;
 };
 
 struct vfsmount {
 	struct dentry *mnt_root;
-	struct super_block *mnt_sb;
 	int mnt_flags;
+};
+
+// struct mount is the internal kernel structure that embeds the public struct vfsmount.
+// We only declare the fields we need; CO-RE relocation resolves the actual offsets at load time.
+struct mount {
+	struct mount *mnt_parent;
+	struct dentry *mnt_mountpoint;
+	struct vfsmount mnt;
+	int mnt_id;
 };
 
 struct path {
@@ -147,14 +142,6 @@ inline const struct qstr *dentry_name(const struct dentry *dentry) {
 	return &dentry->d_name;
 }
 
-inline long unsigned int dentry_ino(const struct dentry *dentry) {
-	return dentry->d_inode->i_ino;
-}
-
-inline dev_t dentry_dev(const struct dentry *dentry) {
-	return dentry->d_sb->s_dev;
-}
-
 inline const struct path *linux_binprm_path(const struct linux_binprm *binprm) {
 	return &binprm->file->f_path;
 }
@@ -163,6 +150,37 @@ inline const struct dentry *path_dentry(const struct path *path) {
 	return path->dentry;
 }
 
-#pragma clang attribute pop
+inline const struct vfsmount *path_mnt(const struct path *path) {
+	return path->mnt;
+}
+
+inline const struct dentry *vfsmount_root(const struct vfsmount *mnt) {
+	return mnt->mnt_root;
+}
+
+// Returns a pointer to the mnt_id field of the struct mount that embeds this vfsmount.
+// The caller must use bpf_probe_read_kernel to dereference the result; direct dereference is
+// rejected by the verifier because the pointer arithmetic takes us outside of `struct vfsmount`
+// bounds.
+//
+// We use `__builtin_preserve_field_info()`, a special CO-RE compliant offset computation
+// function especially made for eBPF with `BPF_FIELD_BYTE_OFFSET = 0` instead of
+// `__builtin_offsetof()` for both offsets. `__builtin_offsetof()` is not reliably CO-RE-relocated
+// when its result is used in pointer arithmetic. `__builtin_preserve_field_info()` generates a
+// `BPF_CORE_FIELD_BYTE_OFFSET` relocation that survives through arithmetic and is correctly
+// applied by the loader.
+// `__builtin_preserve_field_info()` is only available when targeting BPF.
+inline const int *vfsmount_mnt_id_ptr(const struct vfsmount *mnt) {
+#ifdef __bpf__
+	unsigned long mnt_off = __builtin_preserve_field_info(((struct mount *)0)->mnt, 0);
+	unsigned long mnt_id_off = __builtin_preserve_field_info(((struct mount *)0)->mnt_id, 0);
+	return (const int *)((char *)mnt - mnt_off + mnt_id_off);
+#else
+	#warning "This code should never run, can only compile for BPF"
+	return (int *)mnt;
+#endif
+}
 
 #endif
+
+#pragma clang attribute pop
