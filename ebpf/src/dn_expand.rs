@@ -35,7 +35,7 @@ pub fn dn_expand<P: PacketProvider>(
 /// If the input message is malformed (e.g. out‑of‑bounds pointers, loops, excessively
 /// deep recursion), the function stops decoding and returns the bytes read up to that
 /// point. No error code is returned.
-//#[inline(never)] // there seems to be a compiler bug when we inline
+#[inline(never)]
 fn dn_expand_to_buffer<P: PacketProvider>(
     packet_provider: &P,
     index: &mut usize,
@@ -151,7 +151,6 @@ extern "C" fn dn_expand_inner<P: PacketProvider>(
 }
 
 // Helper to read a byte safely, returning None if out of bounds.
-#[inline]
 fn get_byte(packet_provider: &impl PacketProvider, idx: usize) -> Option<u8> {
     let mut value = 0u8;
     packet_provider.load_bytes(idx, &mut value, 1)?;
