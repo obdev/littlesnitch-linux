@@ -31,7 +31,7 @@ pub trait BinarySearchablePage: Sized {
             matching_page: None,
         };
         // 16 steps can search in 64k pages
-        repeat(16, search_for_page_inner, &mut context);
+        repeat(32, search_for_page_inner, &mut context);
         if let Some(page) = context.matching_page {
             Some((page, context.index_range.start - 1))
         } else {
@@ -58,7 +58,7 @@ pub trait BinarySearchablePage: Sized {
             page: self,
         };
         // 10 steps can search in 1k entries
-        repeat(10, search_in_page_inner, &mut context);
+        repeat(16, search_in_page_inner, &mut context);
         if context.match_len == u8::MAX {
             (context.match_len, context.index_range.start)
         } else if context.index_range.start == 0 {
