@@ -17,29 +17,33 @@ use which::which;
 ///
 /// [bindeps]: https://doc.rust-lang.org/nightly/cargo/reference/unstable.html?highlight=feature#artifact-dependencies
 fn main() {
-    // declare dependency on BPF linker as outlined in comment above
-    let bpf_linker = which("bpf-linker").unwrap();
-    println!("cargo:rerun-if-changed={}", bpf_linker.to_str().unwrap());
+    let target_arch = env::var("CARGO_CFG_TARGET_ARCH").unwrap_or_default();
 
-    // declare dependency on C module:
-    println!("cargo::rerun-if-changed=co-re/co-re.c");
-    println!("cargo::rerun-if-changed=co-re/co-re.h");
+    if target_arch == "bpf" {
+        // declare dependency on BPF linker as outlined in comment above
+        let bpf_linker = which("bpf-linker").unwrap();
+        println!("cargo:rerun-if-changed={}", bpf_linker.to_str().unwrap());
 
-    // compile C module to LLVM bitcode
-    let bitcode_file = cc::Build::new()
-        .compiler("clang")
-        .no_default_flags(true)
-        .file("co-re/co-re.c")
-        .flag("-g")
-        .flag("-emit-llvm")
-        .flag("--target=bpf")
-        .compile_intermediates()
-        .into_iter()
-        .next()
-        .expect("bitcode file should compile successfully");
+        // declare dependency on C module:
+        println!("cargo::rerun-if-changed=co-re/co-re.c");
+        println!("cargo::rerun-if-changed=co-re/co-re.h");
 
-    // link with bitcode file:
-    println!("cargo::rustc-link-arg={}", bitcode_file.display());
+        // compile C module to LLVM bitcode
+        let bitcode_file = cc::Build::new()
+            .compiler("clang")
+            .no_default_flags(true)
+            .file("co-re/co-re.c")
+            .flag("-g")
+            .flag("-emit-llvm")
+            .flag("--target=bpf")
+            .compile_intermediates()
+            .into_iter()
+            .next()
+            .expect("bitcode file should compile successfully");
+
+        // link with bitcode file:
+        println!("cargo::rustc-link-arg={}", bitcode_file.display());
+    }
 
     // generate bindings for Rust
     let bindings = bindgen::Builder::default()
