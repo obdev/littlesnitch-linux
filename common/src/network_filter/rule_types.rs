@@ -66,10 +66,14 @@ pub type ExePatternId = u16;
 
 pub trait ExePatternIdExtension {
     fn any() -> ExePatternId;
+    fn none() -> ExePatternId;
 }
 impl ExePatternIdExtension for ExePatternId {
     fn any() -> ExePatternId {
         0
+    }
+    fn none() -> ExePatternId {
+        0xffff
     }
 }
 

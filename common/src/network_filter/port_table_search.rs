@@ -8,7 +8,7 @@ use crate::{
         rule_page::port_table_entry,
         rule_types::{Port, RuleId},
     },
-    repeat::{LoopReturn, repeat},
+    repeat::{LoopReturn, repeat_closure},
 };
 
 pub enum SearchTableType {
@@ -80,20 +80,23 @@ impl SearchSpecification for SpecificPortTableSearch {
         port_table_ref: PortTableReference,
         search_term: &PortTableSearchTerm,
     ) {
-        let mut ctx = MatchPortTableContext {
-            page_base,
-            index: port_table_ref.index_from_page_start(),
-            port: search_term.port,
-            protocol_and_direction: search_term.protocol_and_direction,
-            rule_id: None,
-        };
-        repeat(port_table_ref.count() as _, match_port_table_inner, &mut ctx);
-        if let Some(rule_id) = ctx.rule_id
-            && rule_id.supersedes(self.rule_id)
-        {
-            self.rule_id = rule_id;
-            self.reason = VerdictReason::Rule(rule_id);
-        }
+        let base_index = port_table_ref.index_from_page_start();
+        repeat_closure(port_table_ref.count() as _, |i| {
+            let Some(entry) = port_table_entry(page_base, base_index + i as u16) else {
+                return LoopReturn::LoopBreak;
+            };
+            if entry.is_stop() {
+                return LoopReturn::LoopBreak;
+            }
+            if entry.matches(search_term.port, search_term.protocol_and_direction) {
+                if entry.rule_id.supersedes(self.rule_id) {
+                    self.rule_id = entry.rule_id;
+                    self.reason = VerdictReason::Rule(entry.rule_id);
+                }
+                return LoopReturn::LoopBreak;
+            }
+            LoopReturn::LoopContinue
+        });
     }
 
     fn set_blocklist_match(&mut self, rule_id: RuleId, reason: VerdictReason) {
@@ -106,28 +109,4 @@ impl SearchSpecification for SpecificPortTableSearch {
     fn benchmark_rule_id(&self) -> RuleId {
         self.rule_id
     }
-}
-
-struct MatchPortTableContext {
-    page_base: *const PortTableEntry,
-    index: u16,
-    port: Port,
-    protocol_and_direction: u8,
-    rule_id: Option<RuleId>,
-}
-
-extern "C" fn match_port_table_inner(_index: u64, ctx: &mut MatchPortTableContext) -> LoopReturn {
-    let entry = match port_table_entry(ctx.page_base, ctx.index) {
-        None => return LoopReturn::LoopBreak,
-        Some(entry) => entry,
-    };
-    if entry.is_stop() {
-        return LoopReturn::LoopBreak;
-    }
-    if entry.matches(ctx.port, ctx.protocol_and_direction) {
-        ctx.rule_id = Some(entry.rule_id);
-        return LoopReturn::LoopBreak;
-    }
-    ctx.index += 1;
-    LoopReturn::LoopContinue
 }

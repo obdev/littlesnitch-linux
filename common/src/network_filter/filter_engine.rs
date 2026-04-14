@@ -7,12 +7,11 @@ use crate::{
     network_filter::{
         binary_rule::PortTableEntry,
         blocklist_matching::{blocklist_ipv4_match, blocklist_ipv6_match, blocklist_name_match},
-        filter_model::FilterModel,
+        filter_model::{FilterMetainfo, FilterModel},
         port_table_search::{PortTableSearchTerm, SearchSpecification, SearchTableType},
         rule_page::*,
         rule_types::{DirectionPattern, ExePatternId, ExePatternIdExtension, Protocol},
     },
-    repeat::{LoopReturn, repeat},
 };
 
 impl<T: FilterModel + Sized> FilterEngine for T {}
@@ -90,105 +89,90 @@ pub trait FilterEngine: FilterModel + Sized {
                     .set_blocklist_match(rule_id, VerdictReason::NameBlocklist(blocklist_match));
             }
         }
-        // We would like to pull constants like connection.remote_name(), connection.is_inbound(),
-        // connection.protocol(), connection.port() etc out of the loop, but the eBPF verifier
-        // does not like it when we capture many variables in a block.
-        with_exe_pattern_ids(connection, |exe_pattern_id| {
-            let common_search = PortTableSearchTerm {
-                port: connection.port(),
-                protocol_and_direction: PortTableEntry::protocol_and_direction(
-                    DirectionPattern::with_inbound(connection.is_inbound()),
-                    Protocol::from_u8(connection.protocol()).as_pattern(),
-                ),
-            };
-            if connection.is_ipv6_address() {
-                if let Some((page_base, port_table_ref)) = Ipv6RulePage::find_matching_port_table(
-                    self.ipv6_rules(),
-                    meta.ipv6_rules.page_count,
-                    exe_pattern_id,
-                    connection.ipv6_address(),
-                ) {
-                    search_spec.search_port_table(
-                        SearchTableType::Ipv6,
-                        page_base,
-                        port_table_ref,
-                        &common_search,
-                    );
-                }
-            } else {
-                if let Some((page_base, port_table_ref)) = Ipv4RulePage::find_matching_port_table(
-                    self.ipv4_rules(),
-                    meta.ipv4_rules.page_count,
-                    exe_pattern_id,
-                    &connection.ipv4_address(),
-                ) {
-                    search_spec.search_port_table(
-                        SearchTableType::Ipv4,
-                        page_base,
-                        port_table_ref,
-                        &common_search,
-                    );
-                }
-            }
+        let mut exe_pattern_ids = [ExePatternId::none(); 3];
+        connection.get_exe_pattern_ids(&mut exe_pattern_ids);
+        self.evaluate_rules(meta, connection, exe_pattern_ids[0], search_spec);
+        self.evaluate_rules(meta, connection, exe_pattern_ids[1], search_spec);
+        self.evaluate_rules(meta, connection, exe_pattern_ids[2], search_spec);
+    }
 
-            if let Some(remote_name) = connection.remote_name() {
-                if let Some((page_base, port_table_ref)) = NameRulePage::find_matching_port_table(
-                    self.name_rules(),
-                    meta.name_rules.page_count,
-                    exe_pattern_id,
-                    remote_name,
-                ) {
-                    search_spec.search_port_table(
-                        SearchTableType::Name,
-                        page_base,
-                        port_table_ref,
-                        &common_search,
-                    );
-                }
-            }
-            if let Some((page_base, port_table_ref)) = AnyEndpointRulePage::find_matching_port_table(
-                self.any_endpoint_rules(),
-                meta.any_endpoint_rules.page_count,
+    /// Given a particular `exe_pattern_id`, evaluate rules matching the executable and
+    /// connection.
+    #[inline(never)]
+    fn evaluate_rules<S: SearchSpecification, Input: FilterEngineInput>(
+        &self,
+        meta: &FilterMetainfo,
+        connection: &Input,
+        exe_pattern_id: ExePatternId,
+        search_spec: &mut S,
+    ) {
+        if exe_pattern_id == ExePatternId::none() {
+            return;
+        }
+        let common_search = PortTableSearchTerm {
+            port: connection.port(),
+            protocol_and_direction: PortTableEntry::protocol_and_direction(
+                DirectionPattern::with_inbound(connection.is_inbound()),
+                Protocol::from_u8(connection.protocol()).as_pattern(),
+            ),
+        };
+        if connection.is_ipv6_address() {
+            if let Some((page_base, port_table_ref)) = Ipv6RulePage::find_matching_port_table(
+                self.ipv6_rules(),
+                meta.ipv6_rules.page_count,
                 exe_pattern_id,
-                &(),
+                connection.ipv6_address(),
             ) {
                 search_spec.search_port_table(
-                    SearchTableType::AnyEndpoint,
+                    SearchTableType::Ipv6,
                     page_base,
                     port_table_ref,
                     &common_search,
                 );
             }
-        });
+        } else {
+            if let Some((page_base, port_table_ref)) = Ipv4RulePage::find_matching_port_table(
+                self.ipv4_rules(),
+                meta.ipv4_rules.page_count,
+                exe_pattern_id,
+                &connection.ipv4_address(),
+            ) {
+                search_spec.search_port_table(
+                    SearchTableType::Ipv4,
+                    page_base,
+                    port_table_ref,
+                    &common_search,
+                );
+            }
+        }
+
+        if let Some(remote_name) = connection.remote_name() {
+            if let Some((page_base, port_table_ref)) = NameRulePage::find_matching_port_table(
+                self.name_rules(),
+                meta.name_rules.page_count,
+                exe_pattern_id,
+                remote_name,
+            ) {
+                search_spec.search_port_table(
+                    SearchTableType::Name,
+                    page_base,
+                    port_table_ref,
+                    &common_search,
+                );
+            }
+        }
+        if let Some((page_base, port_table_ref)) = AnyEndpointRulePage::find_matching_port_table(
+            self.any_endpoint_rules(),
+            meta.any_endpoint_rules.page_count,
+            exe_pattern_id,
+            &(),
+        ) {
+            search_spec.search_port_table(
+                SearchTableType::AnyEndpoint,
+                page_base,
+                port_table_ref,
+                &common_search,
+            );
+        }
     }
-}
-
-fn with_exe_pattern_ids<Input: FilterEngineInput>(
-    connection: &Input,
-    mut closure: impl FnMut(ExePatternId),
-) {
-    let mut ctx = ExeLoopContext {
-        closure: &mut closure,
-        exe_pattern_ids: [ExePatternId::any(); _],
-    };
-    let count = connection.get_exe_pattern_ids(&mut ctx.exe_pattern_ids);
-    // Using bpf_loop() here reduces complexity for eBPF verifier enough to pass the verification.
-    // It costs additional stack depth, but we get away with it.
-    repeat(count as _, exe_loop_inner, &mut ctx);
-}
-
-struct ExeLoopContext<'a, C: FnMut(ExePatternId)> {
-    pub closure: &'a mut C,
-    pub exe_pattern_ids: [ExePatternId; 3],
-}
-
-extern "C" fn exe_loop_inner<C: FnMut(ExePatternId)>(
-    index: u64,
-    ctx: &mut ExeLoopContext<C>,
-) -> LoopReturn {
-    if index as usize >= ctx.exe_pattern_ids.len() {
-        return LoopReturn::LoopBreak;
-    }
-    (ctx.closure)(ctx.exe_pattern_ids[index as usize]);
-    LoopReturn::LoopContinue
 }

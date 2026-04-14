@@ -145,8 +145,9 @@ impl BinarySearchablePage for Ipv6BlocklistPage {
 // In order to extend BlocklistPage here, we must make a trait:
 
 impl ByteAtOffset for NameBlocklistPage {
-    fn byte_at_offset(&self, mut index: usize) -> u8 {
-        touch_usize(&mut index); // prevent optimization of range check below
+    fn byte_at_offset(&self, index: usize) -> u8 {
+        // After other changes, the touch_usize() below seems to be no longer necessary.
+        // touch_usize(&mut index); // prevent optimization of range check below
         if index >= BYTES_PER_BLOCKLIST_PAGE {
             // return a different value for out-of-bounds than BpfName::byte_at_index() to
             // cause an early loop exit

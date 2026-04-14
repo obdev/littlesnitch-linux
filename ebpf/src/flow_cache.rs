@@ -44,7 +44,7 @@ impl Context {
         }
         // The eBPF verifier is much faster when we maintain `changes` and `should_send_event`
         // separately.
-        let mut should_send_event = changes.raw() != 0;
+        let mut should_send_event = changes.raw() != 0 || bytes != 0;
         properties.last_activity = self.timestamp;
         if properties.socket_cookie == 0 {
             properties.socket_cookie = unsafe { bpf_get_socket_cookie(self.skb.skb as _) };
@@ -108,7 +108,7 @@ impl Context {
                 changes -= CONNECT;
                 bytes = 0;
             }
-            if should_send_event || bytes != 0 {
+            if should_send_event {
                 event.payload.ephemeral_port = identifier.private_port(properties.is_inbound);
                 event.payload.changes = changes;
                 event.payload.verdict_reason = properties.reason.clone();
@@ -192,11 +192,8 @@ impl Context {
 
         let process_pair: &ProcessPair;
         let verdict;
-        if let Some(properties_ptr) = ACTIVE_FLOWS.get_ptr_mut(&*identifier) {
-            let properties = unsafe { &mut *properties_ptr };
-            self.update_properties(properties, identifier, &header_infos, BitSet::empty());
-            process_pair = &properties.process_pair;
-            verdict = properties.verdict;
+        let properties_ptr = if let Some(properties_ptr) = ACTIVE_FLOWS.get_ptr_mut(&*identifier) {
+            properties_ptr
         } else {
             let properties = &mut self.buffers().flow_properties;
             properties.remote_name = StringId::none();
@@ -220,12 +217,17 @@ impl Context {
             properties.process_pair.executable_pair.parent = None;
             properties.process_pair.executable_pair.uid = 0;
             self.decide_flow_direction(properties, identifier, &header_infos);
-            self.update_properties(properties, identifier, &header_infos, CONNECT);
             // ensure we pass by reference, not by value by using `&*`
             _ = ACTIVE_FLOWS.insert(&*identifier, &*properties, 0);
-            process_pair = &properties.process_pair;
-            verdict = properties.verdict;
-        }
+            let Some(properties_ptr) =  ACTIVE_FLOWS.get_ptr_mut(&*identifier) else {
+                return Some(Verdict::Allow); // unexpected failure, let it pass
+            };
+            properties_ptr
+        };
+        let properties = unsafe { &mut *properties_ptr };
+        self.update_properties(properties, identifier, &header_infos, BitSet::empty());
+        process_pair = &properties.process_pair;
+        verdict = properties.verdict;
         if identifier.protocol == IpProto::Udp as u32 && identifier.remote_port == 53 {
             self.process_dns_packet(header_infos.payload_offset, process_pair);
         }

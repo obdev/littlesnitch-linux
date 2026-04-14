@@ -36,3 +36,23 @@ pub fn repeat<C>(count: u64, function: LoopFunction<C>, context: &mut C) -> u64 
     }
     count
 }
+
+/// `repeat_closure()` is a more convenient wrapper around `repeat()`: it accepts a closure
+/// instead of a "C" function and allows capturing variables instead of a context struct.
+/// However, it results in different verifier complexity. May be better or worse than
+/// "C" function approach.
+pub fn repeat_closure(count: usize, closure: impl FnMut(usize) -> LoopReturn) -> usize {
+    let mut ctx = RepeatClosureCtx { closure };
+    repeat(count as u64, repeat_closure_inner, &mut ctx) as usize
+}
+
+struct RepeatClosureCtx<F: FnMut(usize) -> LoopReturn> {
+    closure: F,
+}
+
+extern "C" fn repeat_closure_inner<F: FnMut(usize) -> LoopReturn>(
+    index: u64,
+    ctx: &mut RepeatClosureCtx<F>,
+) -> LoopReturn {
+    (ctx.closure)(index as usize)
+}

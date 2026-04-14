@@ -2,13 +2,14 @@
 // Copyright (C) 2026 Objective Development Software GmbH
 
 use crate::{
-    bpf_string::BpfString, ByteAtOffset, ext_order::ExtOrder,
+    ByteAtOffset,
+    bpf_string::BpfString,
+    ext_order::ExtOrder,
     network_filter::{
         domain_name_page::DomainNamePage,
         rule_page::{BYTES_PER_RULE_PAGE, RulePage},
         rule_types::{DirectionPattern, ExePatternId, Port, ProtocolPattern, RuleId},
     },
-    touch_usize,
 };
 use core::{cmp::Ordering, fmt::Debug, ops::Range};
 
@@ -242,8 +243,9 @@ pub trait BinaryEndpointTrait: Sized + Debug + 'static {
 
 // implemented for name compare via `DomainNamePage` trait
 impl ByteAtOffset for RulePage<NameBinaryEndpoint> {
-    fn byte_at_offset(&self, mut offset: usize) -> u8 {
-        touch_usize(&mut offset); // prevent optimization of range check below
+    fn byte_at_offset(&self, offset: usize) -> u8 {
+        // After other changes, the touch_usize() below seems to be no longer necessary.
+        // touch_usize(&mut offset); // prevent optimization of range check below
         if offset >= BYTES_PER_RULE_PAGE {
             // return a different value for out-of-bounds than BpfName::byte_at_index() to
             // cause an early loop exit

@@ -6,7 +6,9 @@ use common::{
     bpf_string::BpfString,
     event::ConnectionIdentifier,
     network_filter::{
-        filter_engine::FilterEngineInput, rule_page::ExeNodePair, rule_types::ExePatternId,
+        filter_engine::FilterEngineInput,
+        rule_page::ExeNodePair,
+        rule_types::{ExePatternId, ExePatternIdExtension},
     },
 };
 use core::mem::transmute;
@@ -28,6 +30,7 @@ impl FilterEngineInput for FilterEngineConnection {
     #[inline(always)]
     fn get_exe_pattern_ids(&self, exe_pattern_ids: &mut [ExePatternId; 3]) -> usize {
         let executable_pair = &self.0.process_pair.executable_pair;
+        exe_pattern_ids[0] = ExePatternId::any();
         let mut index = 1;
         if let Some(connecting) = executable_pair.connecting {
             if let Some(parent) = executable_pair.parent {
