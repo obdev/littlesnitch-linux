@@ -77,7 +77,6 @@ async fn main() -> anyhow::Result<()> {
             }
         }
     }
-    ebpf.node_manager.update_mounts();
 
     let start = Instant::now();
     let page_count = ebpf.filter_engine.load_blocklists(&[
