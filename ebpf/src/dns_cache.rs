@@ -5,7 +5,11 @@ use core::cmp;
 
 use aya_ebpf::{helpers::generated::bpf_skb_load_bytes, macros::map, maps::LruHashMap};
 use common::{
-    NanoTime, StringId, bpf_string::BpfString, dns_types::{DnsIpv4Key, DnsIpv6Key, DnsNameKey}, flow_types::{IpAddress, ProcessPair}, repeat::{LoopReturn, repeat}
+    NanoTime, StringId,
+    bpf_string::BpfString,
+    dns_types::{DnsIpv4Key, DnsIpv6Key, DnsNameKey},
+    flow_types::{IpAddress, ProcessPair},
+    repeat::{LoopReturn, repeat_closure},
 };
 
 use crate::{
@@ -29,12 +33,10 @@ static DNS_QUERIES: LruHashMap<DnsNameKey, NanoTime> = LruHashMap::with_max_entr
 static DNS_CNAMES: LruHashMap<DnsNameKey, StringId> = LruHashMap::with_max_entries(8192, 0);
 
 #[map]
-static DNS_IPV4ADDR: LruHashMap<DnsIpv4Key, StringId> =
-    LruHashMap::with_max_entries(8192, 0);
+static DNS_IPV4ADDR: LruHashMap<DnsIpv4Key, StringId> = LruHashMap::with_max_entries(8192, 0);
 
 #[map]
-static DNS_IPV6ADDR: LruHashMap<DnsIpv6Key, StringId> =
-    LruHashMap::with_max_entries(8192, 0);
+static DNS_IPV6ADDR: LruHashMap<DnsIpv6Key, StringId> = LruHashMap::with_max_entries(8192, 0);
 
 pub trait PacketProvider {
     fn len(&self) -> usize;
@@ -121,14 +123,10 @@ impl Context {
             _ = DNS_QUERIES.insert(&name_key, &self.timestamp, 0);
         } else {
             let sane_answer_count = cmp::min(64, dns_msg_header.answer_count) as u64;
-            let mut loop_ctx = DnsAnswerLoopCtx {
-                context: self,
-                index,
-                process_pair,
-                timestamp: self.timestamp,
-                dns_msg_start_index,
-            };
-            repeat(sane_answer_count, parse_answer_inner, &mut loop_ctx);
+            repeat_closure(sane_answer_count as _, |_| {
+                self
+                    .parse_answer(&mut index, process_pair, self.timestamp, dns_msg_start_index)
+            });
         }
     }
 
@@ -161,22 +159,24 @@ impl Context {
         process_pair: &ProcessPair,
         now: NanoTime,
         dns_msg_start_index: u16,
-    ) -> Option<()> {
+    ) -> LoopReturn {
         let string_buffer = &mut self.buffers().string;
         string_buffer.clear();
         dn_expand(self, index, dns_msg_start_index, string_buffer);
         let header = &mut self.buffers().dns_rr_header;
         let header_len = size_of_val(header);
         if *index + header_len > self.len() {
-            return None;
+            return LoopReturn::LoopBreak;
         }
-        self.load_to_buffer(*index, header)?;
+        if self.load_to_buffer(*index, header).is_none() {
+            return LoopReturn::LoopBreak;
+        }
         *index += header_len;
         let data_class = u16::from_be(header.data_class);
         let data_type = u16::from_be(header.data_type);
         let data_len = u16::from_be(header.data_length) as usize;
         if *index + data_len > self.len() {
-            return None; // data does not fit into message
+            return LoopReturn::LoopBreak; // data does not fit into message
         }
         if data_class == RR_CLASS_INET {
             let rr_name = identifier_for_string(string_buffer);
@@ -228,7 +228,7 @@ impl Context {
             }
         }
         *index += data_len;
-        Some(()) // we can continue to next answer
+        LoopReturn::LoopContinue // we can continue to next answer
     }
 
     fn parse_a_record(
@@ -272,12 +272,7 @@ impl Context {
         string_buffer: &mut BpfString,
     ) -> Option<()> {
         string_buffer.clear();
-        dn_expand(
-            self,
-            &mut index,
-            dns_msg_start_index,
-            string_buffer,
-        );
+        dn_expand(self, &mut index, dns_msg_start_index, string_buffer);
         // ignore len, we anyway don't know what to do if we exceed it
         let cname = identifier_for_string(string_buffer);
         let cname_key = DnsNameKey { name: cname };
@@ -286,41 +281,12 @@ impl Context {
     }
 }
 
-struct DnsAnswerLoopCtx<'a> {
-    context: &'a Context,
-    index: usize,
-    process_pair: &'a ProcessPair,
-    timestamp: NanoTime,
-    dns_msg_start_index: u16,
-}
-
-extern "C" fn parse_answer_inner(_i: u64, ctx: &mut DnsAnswerLoopCtx) -> LoopReturn {
-    if ctx
-        .context
-        .parse_answer(
-            &mut ctx.index,
-            ctx.process_pair,
-            ctx.timestamp,
-            ctx.dns_msg_start_index,
-        )
-        .is_none()
-    {
-        LoopReturn::LoopBreak
-    } else {
-        LoopReturn::LoopContinue
-    }
-}
-
 pub fn name_for_address(address: &IpAddress, _process_pair: &ProcessPair) -> StringId {
     if address.is_v6() {
-        let key = DnsIpv6Key {
-            address: *address.address(),
-        };
+        let key = DnsIpv6Key { address: *address.address() };
         *unsafe { DNS_IPV6ADDR.get(&key) }.unwrap_or(&StringId::none())
     } else {
-        let key = DnsIpv4Key {
-            address: address.address()[0],
-        };
+        let key = DnsIpv4Key { address: address.address()[0] };
         *unsafe { DNS_IPV4ADDR.get(&key) }.unwrap_or(&StringId::none())
     }
 }
@@ -332,12 +298,7 @@ impl PacketProvider for Context {
 
     fn load_bytes(&self, offset: usize, destination: *mut u8, len: usize) -> Option<usize> {
         let ret = unsafe {
-            bpf_skb_load_bytes(
-                self.skb.skb.cast(),
-                offset as u32,
-                destination as _,
-                len as u32,
-            )
+            bpf_skb_load_bytes(self.skb.skb.cast(), offset as u32, destination as _, len as u32)
         };
         if ret == 0 { Some(len) } else { None }
     }
