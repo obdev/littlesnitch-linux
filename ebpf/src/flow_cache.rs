@@ -55,16 +55,10 @@ impl Context {
             // Inbound packets are often not yet associated with a socket and process.
             // In both cases the current process may be any running process not related to the
             // network packet.
-
-            // We would like to use the code below to obtain a socket owner for those sockets
-            // which were already open and connected when we started, but the lookup code
-            // is obviously too much complexity for the ebpf verifier. Maybe try again if we
-            // manage to reduce complexity of conversion to our node IDs.
-            // let register_on_demand = !self.is_inbound
-            //     && payload != 0
-            //     && !(identifier.protocol == IpProto::Icmp as _
-            //         || identifier.protocol == IpProto::Ipv6Icmp as _);
-            let register_on_demand = false;
+            let register_on_demand = !self.is_inbound
+                && payload != 0
+                && !(identifier.protocol == IpProto::Icmp as _
+                    || identifier.protocol == IpProto::Ipv6Icmp as _);
             if let Some(socket_properties) =
                 get_socket_properties(properties.socket_cookie, register_on_demand)
             {
@@ -219,7 +213,7 @@ impl Context {
             self.decide_flow_direction(properties, identifier, &header_infos);
             // ensure we pass by reference, not by value by using `&*`
             _ = ACTIVE_FLOWS.insert(&*identifier, &*properties, 0);
-            let Some(properties_ptr) =  ACTIVE_FLOWS.get_ptr_mut(&*identifier) else {
+            let Some(properties_ptr) = ACTIVE_FLOWS.get_ptr_mut(&*identifier) else {
                 return Some(Verdict::Allow); // unexpected failure, let it pass
             };
             properties_ptr
