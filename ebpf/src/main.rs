@@ -33,7 +33,7 @@ use crate::{
     co_re::*,
     context::Context,
     current_executable::{
-        report_exec_attempt_with_path, report_exec_success, report_sched_process_exec,
+        report_exec_attempt_with_path, report_exec_completed, report_sched_process_exec,
         report_sched_process_exit, report_sched_process_fork,
     },
     dns_cache::name_for_address,
@@ -106,6 +106,10 @@ pub fn cgroup_sock_addr_sendmsg6(ctx: SockAddrContext) -> i32 {
     handle_sock_addr(ctx.sock_addr, true, true)
 }
 
+// We have four options for detecting an execve() and also four options for detecting
+// that it has completed. There are so many options because it depends on the kernel config
+// and kernel compile options which of the functions is available.
+
 #[fentry(function = "bprm_execve")] // since Linux 5.5
 pub fn fentry_bprm_execve(ctx: FEntryContext) -> i32 {
     // We have very special requirements for our interception point: The kernel must have the
@@ -136,74 +140,121 @@ pub fn fentry_bprm_execve(ctx: FEntryContext) -> i32 {
     0 // return value is ignored
 }
 
-#[fexit(function = "bprm_execve")] // since Linux 5.5
-pub fn fexit_bprm_execve(ctx: FExitContext) -> i32 {
-    let return_value: i32 = ctx.arg(1);
-    report_exec_success(return_value);
-    0 // return value is ignored
-}
-
 // This is an alternative to fentry_bprm_execve(). It is used if the kernel does not allow tracing.
 #[kprobe]
-fn kprobe_bprm_execve(ctx: ProbeContext) -> Option<()> {
+pub fn kprobe_bprm_execve(ctx: ProbeContext) -> i32 {
+    _ = report_exec_attempt_with_ctx(ctx);
+    0
+}
+
+#[fentry(function = "security_bprm_creds_for_exec")]
+pub fn fentry_security_bprm_creds_for_exec(ctx: FEntryContext) -> i32 {
     unsafe {
+        let bprm: *const linux_binprm = ctx.arg(0);
+        let path = Path::new(&*linux_binprm_path(bprm));
+        report_exec_attempt_with_path(path);
+    }
+    0
+}
+
+#[kprobe]
+pub fn kprobe_security_bprm_creds_for_exec(ctx: ProbeContext) -> i32 {
+    _ = report_exec_attempt_with_ctx(ctx);
+    0
+}
+
+fn report_exec_attempt_with_ctx(ctx: ProbeContext) -> Option<()> {
+    let path = unsafe {
         let bprm: *const linux_binprm = ctx.arg(0)?;
         let file: *const file = read_at_offset(bprm, linux_binprm_file_offset())?;
         let dentry: &dentry = read_at_offset(file, file_path_offset() + path_dentry_offset())?;
         let mnt: &vfsmount = read_at_offset(file, file_path_offset() + path_mnt_offset())?;
-        let path = Path { dentry, mnt };
-        report_exec_attempt_with_path(path);
-    }
-    Some(()) // return value is ignored
+        Path { dentry, mnt }
+    };
+    report_exec_attempt_with_path(path);
+    Some(())
+}
+
+#[fexit(function = "bprm_execve")] // since Linux 5.5
+pub fn fexit_bprm_execve(_ctx: FExitContext) -> i32 {
+    report_exec_completed();
+    0 // return value is ignored
 }
 
 // This is an alternative to fexit_bprm_execve(). It is used if the kernel does not allow tracing.
 #[kretprobe]
-pub fn kretprobe_bprm_execve(ctx: RetProbeContext) -> u32 {
-    let return_value: i32 = ctx.ret();
-    report_exec_success(return_value);
+pub fn kretprobe_bprm_execve(_ctx: RetProbeContext) -> u32 {
+    report_exec_completed();
+    0 // return value is ignored
+}
+
+#[fexit(function = "sched_mm_cid_after_execve")] // since Linux 5.5
+pub fn fexit_sched_mm_cid_after_execve(_ctx: FExitContext) -> i32 {
+    report_exec_completed();
+    0 // return value is ignored
+}
+
+// This is an alternative to fexit_bprm_execve(). It is used if the kernel does not allow tracing.
+#[kretprobe]
+pub fn kretprobe_sched_mm_cid_after_execve(_ctx: RetProbeContext) -> u32 {
+    report_exec_completed();
     0 // return value is ignored
 }
 
 #[tracepoint] // since Linux 4.7
 pub fn tracepoint_sched_process_exec(ctx: TracePointContext) -> i32 {
-    _ = handle_sched_process_exec(ctx);
-    0
     // [...]
     // field:__data_loc char[] filename;	offset:8;	size:4;	signed:0;
     // field:pid_t pid;	offset:12;	size:4;	signed:1;
     // field:pid_t old_pid;	offset:16;	size:4;	signed:1;
+    let f = || unsafe {
+        let new_pid: i32 = ctx.read_at(12)?;
+        let old_pid: i32 = ctx.read_at(16)?;
+        report_sched_process_exec(old_pid, new_pid);
+        Result::<(), i64>::Ok(())
+    };
+    _ = f();
+    0
 }
 
 #[tracepoint] // since Linux 4.7
 pub fn tracepoint_sched_process_fork(ctx: TracePointContext) -> i32 {
-    _ = handle_sched_process_fork(ctx);
-    0
     // [...]
     // field:__data_loc char[] parent_comm;	offset:8;	size:4;	signed:0;
     // field:pid_t parent_pid;	offset:12;	size:4;	signed:1;
     // field:__data_loc char[] child_comm;	offset:16;	size:4;	signed:0;
     // field:pid_t child_pid;	offset:20;	size:4;	signed:1;
+    let f = || unsafe {
+        let parent_pid: i32 = ctx.read_at(12)?;
+        let child_pid: i32 = ctx.read_at(20)?;
+        report_sched_process_fork(parent_pid, child_pid);
+        Result::<(), i64>::Ok(())
+    };
+    _ = f();
+    0
 }
 
 #[tracepoint] // since Linux 4.7
 pub fn tracepoint_sched_process_exit(ctx: TracePointContext) -> i32 {
-    _ = handle_sched_process_exit(ctx);
-    0
     // [...]
     // field:char comm[16];	offset:8;	size:16;	signed:0;
     // field:pid_t pid;	offset:24;	size:4;	signed:1;
     // field:int prio;	offset:28;	size:4;	signed:1;
     // field:bool group_dead;	offset:32;	size:1;	signed:0;
+    let f = || unsafe {
+        let pid = ctx.read_at(24)?;
+        report_sched_process_exit(pid);
+        Result::<(), i64>::Ok(())
+    };
+    _ = f();
+    0
 }
 
 /* not needed yet
 #[tracepoint]
 pub fn tracepoint_sys_exit_mount(_ctx: TracePointContext) -> i32 {
     // Note: called in fast succession when setting up a virtual environment.
-    unsafe {
-        bpf_printk!(b"did mount");
-    }
+    unsafe { bpf_printk!(b"did mount"); }
     0
     // [...]
     // field:int __syscall_nr;	offset:8;	size:4;	signed:1;
@@ -212,9 +263,7 @@ pub fn tracepoint_sys_exit_mount(_ctx: TracePointContext) -> i32 {
 
 #[tracepoint]
 pub fn tracepoint_sys_exit_fsmount(_ctx: TracePointContext) -> i32 {
-    unsafe {
-        bpf_printk!(b"did fsmount");
-    }
+    unsafe { bpf_printk!(b"did fsmount"); }
     0
     // [...]
     // field:int __syscall_nr;	offset:8;	size:4;	signed:1;
@@ -284,46 +333,6 @@ fn handle_sock_addr(addr: *mut bpf_sock_addr, is_ipv6: bool, _is_sendmsg: bool) 
     } else {
         SK_PASS as _
     }
-}
-
-fn handle_sched_process_exec(ctx: TracePointContext) -> Result<(), i64> {
-    // [...]
-    // field:__data_loc char[] filename;	offset:8;	size:4;	signed:0;
-    // field:pid_t pid;	offset:12;	size:4;	signed:1;
-    // field:pid_t old_pid;	offset:16;	size:4;	signed:1;
-    unsafe {
-        let new_pid: i32 = ctx.read_at(12)?;
-        let old_pid: i32 = ctx.read_at(16)?;
-        report_sched_process_exec(old_pid, new_pid);
-    }
-    Ok(())
-}
-
-fn handle_sched_process_fork(ctx: TracePointContext) -> Result<(), i64> {
-    // [...]
-    // field:__data_loc char[] parent_comm;	offset:8;	size:4;	signed:0;
-    // field:pid_t parent_pid;	offset:12;	size:4;	signed:1;
-    // field:__data_loc char[] child_comm;	offset:16;	size:4;	signed:0;
-    // field:pid_t child_pid;	offset:20;	size:4;	signed:1;
-    unsafe {
-        let parent_pid: i32 = ctx.read_at(12)?;
-        let child_pid: i32 = ctx.read_at(20)?;
-        report_sched_process_fork(parent_pid, child_pid);
-    }
-    Ok(())
-}
-
-fn handle_sched_process_exit(ctx: TracePointContext) -> Result<(), i64> {
-    // [...]
-    // field:char comm[16];	offset:8;	size:16;	signed:0;
-    // field:pid_t pid;	offset:24;	size:4;	signed:1;
-    // field:int prio;	offset:28;	size:4;	signed:1;
-    // field:bool group_dead;	offset:32;	size:1;	signed:0;
-    unsafe {
-        let pid = ctx.read_at(24)?;
-        report_sched_process_exit(pid);
-    }
-    Ok(())
 }
 
 fn handle_packet(ctx: SkBuffContext, is_inbound: bool) -> i32 {

@@ -38,18 +38,24 @@ static RUNNING_EXEC_PARAMS: LruHashMap<i32, NodeId> = LruHashMap::with_max_entri
 // both in our cache.
 
 /// Called from a tracing function where we can associate a file path with a PID. It is not yet
-/// known whether the exec will succeed. There is a second call `report_exec_success(rval: i32)`
-/// which tells whether we should store the new PID -> node association or discard it.
-/// Although we get the function parameters in the exit hook, the struct pointed to has been
-/// modified and the data we need is no longer available on exit.
+/// known whether the exec will succeed. There are two more calls to distinguish success
+/// from failure: `report_sched_process_exec()` is called on success, but before exec completes.
+/// `report_exec_completed()` is called when exec completes, regardless of success. When
+/// `report_sched_process_exec()` is called, we can make the PID to node association public.
+/// When `report_exec_completed()` is called, we can discard the temporary cache.
 /// We may have to move the PID later if it moves to a different CGROUP.
-#[inline(always)]   // only one of the two call sites will ever be used
+#[inline(always)] // only one of the two call sites will ever be used
 pub fn report_exec_attempt_with_path(path: Path) {
-    // unsafe { bpf_printk!(b"%d%d%d exec_with_path %pks", 1, 1, 1, (*path.dentry).d_name.name); }
     let buffers = StaticBuffers::get(ConcurrencyGroup::FentryExec);
     if buffers.is_null() {
         return;
     }
+
+    // let name = unsafe { &mut (*buffers).string };
+    // name.clear();
+    // qstr_string(dentry_name(path.dentry as _), name);
+    // unsafe { bpf_printk!(b"%d%d exec_with_path pid=%d %pks", 1, 1, bpf_get_current_pid_tgid() as i32, name.data.as_ptr()); }
+
     let mut node_cache = NodeCache::new(buffers);
     if let Some(node_id) = node_cache.node_id_for_path(path) {
         let pid = bpf_get_current_pid_tgid() as i32;
@@ -57,31 +63,29 @@ pub fn report_exec_attempt_with_path(path: Path) {
     }
 }
 
-pub fn report_exec_success(return_value: i32) {
+/// Called when an exec attempt finishes, either successfully or with error.
+pub fn report_exec_completed() {
     let pid = bpf_get_current_pid_tgid() as i32;
-    if let Some(node_id) = unsafe { RUNNING_EXEC_PARAMS.get(&pid) } {
-        if return_value == 0 {
-            _ = PID_TO_NODE_ID.insert(&pid, node_id, 0);
-        }
-        _ = RUNNING_EXEC_PARAMS.remove(&pid);
-    }
+    // unsafe { bpf_printk!(b"%d%d%d exec_completed: %d", 1, 1, 1, pid); }
+    _ = RUNNING_EXEC_PARAMS.remove(&pid);
 }
 
 pub fn report_sched_process_exec(old_pid: i32, new_pid: i32) {
     unsafe {
         // bpf_printk!(b"%d%d report_sched_process_exec old=%d new=%d", 1, 1, old_pid, new_pid);
-        if new_pid != old_pid
-            && let Some(&node_id) = PID_TO_NODE_ID.get(&old_pid)
-        {
+
+        // bprm_execve() succeeded, store the result in PID_TO_NODE_ID
+        // node_id has been stored for old_pid
+        if let Some(node_id) = RUNNING_EXEC_PARAMS.get(&old_pid) {
             _ = PID_TO_NODE_ID.insert(&new_pid, node_id, 0);
-            _ = PID_TO_NODE_ID.remove(&old_pid);
+            _ = RUNNING_EXEC_PARAMS.remove(&old_pid);
         }
     }
 }
 
 pub fn report_sched_process_fork(parent_pid: i32, child_pid: i32) {
     unsafe {
-        //bpf_printk!(b"%d%d report_sched_process_fork parent=%d child=%d", 1, 1, parent_pid, child_pid);
+        // bpf_printk!(b"%d%d report_sched_process_fork parent=%d child=%d", 1, 1, parent_pid, child_pid);
         if let Some(&node_id) = PID_TO_NODE_ID.get(&parent_pid) {
             _ = PID_TO_NODE_ID.insert(&child_pid, node_id, 0);
         }
@@ -89,7 +93,7 @@ pub fn report_sched_process_fork(parent_pid: i32, child_pid: i32) {
 }
 
 pub fn report_sched_process_exit(pid: i32) {
-    // unsafe { bpf_printk!(b"%d%d%d exit pid=0x%d", 1, 1, 1, pid); }
+    // unsafe { bpf_printk!(b"%d%d%d exit pid=%d", 1, 1, 1, pid); }
     _ = PID_TO_NODE_ID.remove(&pid);
 }
 
