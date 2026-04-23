@@ -349,7 +349,7 @@ fn handle_packet(ctx: SkBuffContext, is_inbound: bool) -> i32 {
     // and it just returns the raw value of the verdict.
     // The verifier, on the other hand, sees the full possible value range of Verdict
     // (which is 0..256 for u8) and rejects our program.
-    match ctx.update_from_packet() {
+    match ctx.update_from_packet(ether_type == ETHER_TYPE_IPV6) {
         Some(Verdict::Deny) => SK_DROP as _,
         _ => SK_PASS as _,
     }

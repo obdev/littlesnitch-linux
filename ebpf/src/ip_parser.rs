@@ -24,12 +24,20 @@ pub struct HeaderInfos {
 }
 
 const _AF_INET: u32 = 2;
-const AF_INET6: u32 = 10;
+const _AF_INET6: u32 = 10;
 
 impl Context {
     // returns payload offset
-    pub fn parse_headers(&self, flow_identifier: &mut FlowIdentifier) -> Option<HeaderInfos> {
-        let is_ipv6 = self.skb.family() == AF_INET6;
+    pub fn parse_headers(
+        &self,
+        flow_identifier: &mut FlowIdentifier,
+        is_ipv6: bool,
+    ) -> Option<HeaderInfos> {
+        // We cannot use self.skb.family() to determine the protocol because it is possible to
+        // send IPv4 packets on a socket opened with AF_INET6. Detect the protocol from the
+        // ethernet header instead. We would need self.skb.family() if we would read the socket
+        // addresses from skb, but we don't do that.
+        // let is_ipv6 = self.skb.family() == AF_INET6;
         let next_proto_offset: usize;
         let protocol: u8;
         if is_ipv6 {

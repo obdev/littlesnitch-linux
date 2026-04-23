@@ -147,32 +147,11 @@ impl Context {
         }
     }
 
-    // Kept for reference: reading IPv6 addresses via `bpf_probe_read_kernel` is required because
-    // a direct dereference (e.g. `*skb.local_ipv6()`) produces code that the eBPF verifier rejects.
-    //
-    // for reasons not comprehensible to me, the local port is given in host byte order while
-    // the remote port is in network byte order. Swap accordingly.
-    // let (local_address, remote_address) = if is_ipv6 {
-    //     // We could use a simple `*skb.local_ipv6()` to read the value.
-    //     // However, LLVM generates code which does not pass the verifier.
-    //     // Using `bpf_probe_read_kernel()` gets around this problem.
-    //     let local: [u32; 4] =
-    //         unsafe { bpf_probe_read_kernel(skb.local_ipv6()) }.unwrap_or_default();
-    //     let remote: [u32; 4] =
-    //         unsafe { bpf_probe_read_kernel(skb.remote_ipv6()) }.unwrap_or_default();
-    //     (IpAddress::v6(local), IpAddress::v6(remote))
-    // } else {
-    //     (
-    //         IpAddress::v4(skb.local_ipv4()),
-    //         IpAddress::v4(skb.remote_ipv4()),
-    //     )
-    // };
-
-    pub fn update_from_packet(&self) -> Option<Verdict> {
+    pub fn update_from_packet(&self, is_ipv6: bool) -> Option<Verdict> {
         // local_ip*(), remote_ip*(), local_port() and remote_port() are properties of the bind()
         // socket call. They may be invalid for unbound sockets.
         let identifier = &mut self.buffers().flow_identifier;
-        let header_infos = self.parse_headers(identifier)?;
+        let header_infos = self.parse_headers(identifier, is_ipv6)?;
 
         // Ignore (and allow) ICMP, except echo, which goes through the filter as everything else.
         match (unsafe { transmute(identifier.protocol as u8) }, header_infos.icmp_type) {
