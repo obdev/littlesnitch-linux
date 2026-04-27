@@ -67,6 +67,7 @@ use common::{
         port_table_search::SpecificPortTableSearch,
     },
 };
+use network_types::ip::IpProto;
 
 const ETHER_TYPE_IPV4: u16 = 0x0800;
 const ETHER_TYPE_IPV6: u16 = 0x86DD;
@@ -282,13 +283,20 @@ pub fn cgroup_skb_receive(ctx: SkBuffContext) -> i32 {
     handle_packet(ctx, true)
 }
 
-fn handle_sock_addr(addr: *mut bpf_sock_addr, is_ipv6: bool, _is_sendmsg: bool) -> i32 {
+fn handle_sock_addr(addr: *mut bpf_sock_addr, is_ipv6: bool, is_sendmsg: bool) -> i32 {
     // Only called for outgoing packets.
     // If this is a sendmsg() call, we could, in principle, get the local address and port.
     let cookie = unsafe { bpf_get_socket_cookie(addr as _) };
     if let Some(properties) = get_socket_properties(cookie, true) {
         let addr = unsafe { &*addr };
-        addr.protocol;
+        if !is_sendmsg && addr.protocol == IpProto::Udp as u32 {
+            // This is a connect() call for UDP. Register the socket and executable, but do not
+            // report traffic and do not DROP. No bytes will be sent anyway. The user space
+            // caller would receive an EPERM for the connect() call which may come unexpected.
+            // Hint: sshd connects a UDP socket to address 0.0.0.0:22 on startup without ever
+            // sending any data.
+            return SK_PASS as _;
+        }
         let mut verdict = Verdict::Allow;
         enqueue_event(|event| {
             event.connection_identifier.process_pair = properties.owner.clone();

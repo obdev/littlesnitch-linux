@@ -98,6 +98,8 @@ impl Context {
                 (properties.verdict, properties.reason) = search_spec.result();
             }
             if properties.verdict == Verdict::Deny {
+                // `should_send_event` must already be true because we enter this function
+                // either with a CONNECT change or with bytes to send.
                 changes += BLOCKED;
                 changes -= CONNECT;
                 bytes = 0;
