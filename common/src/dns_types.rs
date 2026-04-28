@@ -19,16 +19,15 @@ pub struct DnsNameKey {
 #[cfg_attr(feature = "user", derive(Clone, Copy))]
 pub struct DnsIpv4Key {
     // Consider adding process identification here
-    pub address: u32,
+    pub address: u32, // network byte order
 }
 
 #[repr(C)]
 #[cfg_attr(feature = "user", derive(Clone, Copy))]
 pub struct DnsIpv6Key {
     // Consider adding process identification here
-    pub address: [u32; 4],
+    pub address: [u32; 4], // network byte order
 }
-
 
 #[cfg(feature = "user")]
 unsafe impl aya::Pod for DnsNameKey {}

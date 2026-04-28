@@ -8,7 +8,7 @@ use common::{
     NanoTime, StringId,
     bpf_string::BpfString,
     dns_types::{DnsIpv4Key, DnsIpv6Key, DnsNameKey},
-    flow_types::{IpAddress, ProcessPair},
+    flow_types::{IpAddress, LOCALHOST_ADDRESS, LOCALHOST_MASK, ProcessPair},
     repeat::{LoopReturn, repeat_closure},
 };
 
@@ -124,8 +124,7 @@ impl Context {
         } else {
             let sane_answer_count = cmp::min(64, dns_msg_header.answer_count) as u64;
             repeat_closure(sane_answer_count as _, |_| {
-                self
-                    .parse_answer(&mut index, process_pair, self.timestamp, dns_msg_start_index)
+                self.parse_answer(&mut index, process_pair, self.timestamp, dns_msg_start_index)
             });
         }
     }
@@ -243,7 +242,11 @@ impl Context {
         }
         let mut address = 0u32;
         self.load_to_buffer(index, &mut address)?;
-        _ = DNS_IPV4ADDR.insert(&DnsIpv4Key { address }, &query_name, 0);
+        // Ignore loopback addresses in response. That's common with PiHole and the frontend
+        // would show the blocked name as remote for localhost connections.
+        if address & LOCALHOST_MASK != LOCALHOST_ADDRESS && address != 0 {
+            _ = DNS_IPV4ADDR.insert(&DnsIpv4Key { address }, &query_name, 0);
+        }
         Some(())
     }
 
@@ -259,7 +262,12 @@ impl Context {
         }
         let mut address = [0u32; 4];
         self.load_to_buffer(index, &mut address)?;
-        _ = DNS_IPV6ADDR.insert(&DnsIpv6Key { address }, &query_name, 0);
+        // Ignore loopback addresses in response. That's common with PiHole and the frontend
+        // would show the blocked name as remote for localhost connections.
+        // IPv6 loopback is ::1 or ::0 (the unspecified address).
+        if address[0] | address[1] | address[2] | (address[3] & !1u32.to_be()) != 0 {
+            _ = DNS_IPV6ADDR.insert(&DnsIpv6Key { address }, &query_name, 0);
+        }
         Some(())
     }
 
