@@ -118,8 +118,8 @@ const _strings = {
   'dlg-update-period-label':    'Update Period',
   'err-name-required':          'Name is required.',
   'err-url-required':           'URL is required.',
-  'err-url-http-only':          'Only HTTP(S) and file:// URLs are supported.',
-  'err-url-invalid':            'Please enter a valid HTTP(S) or file:// URL.',
+  'err-url-http-only':          'Only HTTP and HTTPS URLs are supported.',
+  'err-url-invalid':            'Please enter a valid HTTP(S) URL.',
   'err-update-period-invalid':  'Please select a valid update period.',
 
   // --- Rules section ---

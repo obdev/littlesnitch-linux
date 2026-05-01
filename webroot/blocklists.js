@@ -481,7 +481,7 @@ function submitBlocklistModal() {
     addBlocklistUrl.focus();
     return;
   }
-  if (parsedUrl.protocol !== 'http:' && parsedUrl.protocol !== 'https:' && parsedUrl.protocol !== 'file:') {
+  if (parsedUrl.protocol !== 'http:' && parsedUrl.protocol !== 'https:') {
     setAddBlocklistError(t('err-url-http-only'));
     addBlocklistUrl.focus();
     return;
