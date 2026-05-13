@@ -31,7 +31,7 @@
 
 <body>
   <!-- SVG symbols available throughout the app -->
-  <svg width="0" height="0" style="position: absolute; overflow: hidden;" xmlns="http://www.w3.org/2000/svg">
+  <svg width="0" height="0" class="svg-defs" xmlns="http://www.w3.org/2000/svg">
     <defs>
       <symbol id="search-loupe" viewBox="0 -960 960 960">
         <path d="M380-320q-109 0-184.5-75.5T120-580q0-109 75.5-184.5T380-840q109 0 184.5 75.5T640-580q0 44-14 83t-38 69l224 224q11 11 11 28t-11 28q-11 11-28 11t-28-11L532-372q-30 24-69 38t-83 14Zm0-80q75 0 127.5-52.5T560-580q0-75-52.5-127.5T380-760q-75 0-127.5 52.5T200-580q0 75 52.5 127.5T380-400Z"/>
@@ -127,7 +127,7 @@
         <button class="tab is-active" role="tab" aria-selected="true" data-section="connections" data-i18n="tab-connections">Connections</button>
         <button class="tab" role="tab" aria-selected="false" data-section="blocklists" data-i18n="tab-blocklists">Blocklists</button>
         <button class="tab" role="tab" aria-selected="false" data-section="rules" data-i18n="tab-rules">Rules</button>
-        <div style="position: relative;">
+        <div>
           <button class="theme-toggle" type="button" aria-label="Theme" data-role="theme-toggle" aria-haspopup="true" aria-expanded="false">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
               <path d="M12 3a9 9 0 1 0 9 9c0-.46-.04-.92-.1-1.36a5.389 5.389 0 0 1-4.4 2.26 5.403 5.403 0 0 1-3.14-9.8c-.44-.06-.9-.1-1.36-.1z"/>
@@ -148,7 +148,7 @@
             </button>
           </div>
         </div>
-        <div style="position: relative;" data-role="logout-control" hidden>
+        <div data-role="logout-control" hidden>
           <button class="theme-toggle" type="button" aria-label="Logout" data-role="logout-toggle" data-i18n-aria-label="logout-btn-label" aria-haspopup="true" aria-expanded="false">
             <svg width="18" height="18" fill="currentColor"><use href="#logout" /></svg>
           </button>

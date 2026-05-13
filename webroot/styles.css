@@ -163,6 +163,17 @@ body {
   min-width: 820px;
 }
 
+.svg-defs {
+  position: absolute;
+  top: 0;
+  left: 0;
+  overflow: hidden;
+}
+
+.header-tabs > div {
+  position: relative;
+}
+
 body * {
   scrollbar-color: var(--text) transparent;
 }
