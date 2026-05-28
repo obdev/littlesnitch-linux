@@ -1529,4 +1529,4 @@ function handleSetInspector(msg) {
     });
   }
 }
-window.handleEvents = handleSetInspector;
+window.handleSetInspector = handleSetInspector;
