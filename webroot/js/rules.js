@@ -3,7 +3,7 @@
 
 let rulesCurrentList = [];
 let rulesDisplayedList = [];
-const ruleSelection = createMultiSelection({
+const ruleSelection = FooterApp.createMultiSelection({
   getCount: () => rulesDisplayedList.length,
   getItemByIndex: (i) => rulesDisplayedList[i],
   getId: (rule) => rule.id,
@@ -51,41 +51,41 @@ function ruleDirectionArrow(direction) {
     case 3: suffix = 'bidirectional'; break;
     default: suffix = 'outgoing';
   }
-  return `<svg width="20" height="20" fill="currentColor"><use href="#rule-${suffix}"/></svg>`;
+  return `<svg width="20" height="20" fill="currentColor"><use href="sprite/sprite.svg#rule-${suffix}"/></svg>`;
 }
 
 function ruleDirectionLabel(direction) {
   switch (direction) {
     case 1:
-      return t('direction-out');
+      return window._localization.t('direction-out');
     case 2:
-      return t('direction-in');
+      return window._localization.t('direction-in');
     case 3:
-      return t('direction-both');
+      return window._localization.t('direction-both');
     default:
-      return t('direction-out');
+      return window._localization.t('direction-out');
   }
 }
 
 function ruleDirectionLabelLong(direction) {
   switch (direction) {
     case 1:
-      return t('direction-outbound');
+      return window._localization.t('direction-outbound');
     case 2:
-      return t('direction-inbound');
+      return window._localization.t('direction-inbound');
     case 3:
-      return t('direction-both-ways');
+      return window._localization.t('direction-both-ways');
     default:
-      return t('direction-outbound');
+      return window._localization.t('direction-outbound');
   }
 }
 
 function rulePriorityLabel(priority) {
   const names = {
-    0: t('priority-low'),
-    1: t('priority-regular'),
-    2: t('priority-high'),
-    3: t('priority-extra-high'),
+    0: window._localization.t('priority-low'),
+    1: window._localization.t('priority-regular'),
+    2: window._localization.t('priority-high'),
+    3: window._localization.t('priority-extra-high'),
   };
   const value = Number(priority);
   if (Number.isFinite(value) && Object.prototype.hasOwnProperty.call(names, value)) {
@@ -99,12 +99,12 @@ function normalizedRuleAction(action) {
 }
 
 function ruleActionLabel(action) {
-  return normalizedRuleAction(action) === 'allow' ? t('action-allow') : t('action-deny');
+  return normalizedRuleAction(action) === 'allow' ? window._localization.t('action-allow') : window._localization.t('action-deny');
 }
 
 function ruleActionSVG(action) {
   const suffix = normalizedRuleAction(action) === 'allow' ? 'allow' : 'deny';
-  return `<svg width="14" height="14"><use href="#rule-${suffix}" /></svg>`;
+  return `<svg width="14" height="14"><use href="sprite/sprite.svg#rule-${suffix}" /></svg>`;
 }
 
 function ruleActionEmoji(action) {
@@ -121,27 +121,27 @@ function ruleProcessLabel(rule) {
     return primary;
   }
   if (via) {
-    return t('any-process-via', { via });
+    return window._localization.t('any-process-via', { via });
   }
-  return t('any-process');
+  return window._localization.t('any-process');
 }
 
 function ruleRemotePatternLabel(remotePattern) {
   if (!remotePattern || !remotePattern.type) {
-    return t('any-server');
+    return window._localization.t('any-server');
   }
   switch (remotePattern.type) {
     case 'any':
-      return t('any-server');
+      return window._localization.t('any-server');
     case 'localNet':
-      return t('remote-local-network');
+      return window._localization.t('remote-local-network');
     case 'domains':
       return `domain ${remotePattern.value || ''}`.trim();
     case 'hosts':
     case 'ipAddresses':
       return remotePattern.value || '';
     default:
-      return t('any-server');
+      return window._localization.t('any-server');
   }
 }
 
@@ -382,47 +382,47 @@ function toggleRulesSort(sortKey) {
 
 function ruleProtocolInspectorLabel(protocolMask) {
   if (protocolMask === 31) {
-    return t('any-protocol');
+    return window._localization.t('any-protocol');
   }
   const protocols = ruleProtocolsFromMask(protocolMask);
-  return protocols.length > 0 ? protocols.join(', ') : t('any-protocol');
+  return protocols.length > 0 ? protocols.join(', ') : window._localization.t('any-protocol');
 }
 
 function rulePortInspectorLabel(portString) {
   if (!portString || portString === '0-65535') {
-    return t('any-port');
+    return window._localization.t('any-port');
   }
   return portString;
 }
 
 function ruleRemoteInspectorLabel(remotePattern) {
   if (!remotePattern || !remotePattern.type || remotePattern.type === 'any') {
-    return t('any-server');
+    return window._localization.t('any-server');
   }
   if (remotePattern.type === 'localNet') {
-    return t('remote-local-network');
+    return window._localization.t('remote-local-network');
   }
   const raw = (remotePattern.value || '').trim();
   const parts = raw.length === 0
     ? []
     : raw.split(',').map((part) => part.trim()).filter((part) => part.length > 0);
   if (remotePattern.type === 'hosts') {
-    return `${parts.length <= 1 ? t('remote-host') : t('remote-hosts')} ${parts.join(', ')}`.trim();
+    return `${parts.length <= 1 ? window._localization.t('remote-host') : window._localization.t('remote-hosts')} ${parts.join(', ')}`.trim();
   }
   if (remotePattern.type === 'domains') {
-    return `${parts.length <= 1 ? t('remote-domain-singular') : t('remote-domains')} ${parts.join(', ')}`.trim();
+    return `${parts.length <= 1 ? window._localization.t('remote-domain-singular') : window._localization.t('remote-domains')} ${parts.join(', ')}`.trim();
   }
   if (remotePattern.type === 'ipAddresses') {
-    return `${parts.length <= 1 ? t('remote-address') : t('remote-addresses')} ${parts.join(', ')}`.trim();
+    return `${parts.length <= 1 ? window._localization.t('remote-address') : window._localization.t('remote-addresses')} ${parts.join(', ')}`.trim();
   }
-  return t('any-server');
+  return window._localization.t('any-server');
 }
 
 function ruleHeadline(rule) {
   const action = `${ruleActionSVG(rule.action)} <span>${ruleActionLabel(rule.action)}</span>`;
   const executable = rule.primaryExecutable
     ? (rule.viaExecutable ? `${escapeHtml(rule.primaryExecutable)} via ${escapeHtml(rule.viaExecutable)}` : escapeHtml(rule.primaryExecutable))
-    : (rule.viaExecutable ? t('any-process-via', { via: escapeHtml(rule.viaExecutable) }) : t('any-process'));
+    : (rule.viaExecutable ? window._localization.t('any-process-via', { via: escapeHtml(rule.viaExecutable) }) : window._localization.t('any-process'));
   const direction = ruleDirectionArrow(rule.direction);
   const remote = escapeHtml(ruleRemoteInspectorLabel(rule.remotePattern));
   return `${action} <span>${executable}</span> ${direction} <span>${remote}</span>`;
@@ -435,10 +435,10 @@ function ruleLifetimeLabel(lifetime) {
   if (lifetime && typeof lifetime === 'object') {
     const until = lifetime.until ?? lifetime.Until;
     if (typeof until === 'number') {
-      return t('lifetime-until', { datetime: formatDateTime(until) });
+      return window._localization.t('lifetime-until', { datetime: formatDateTime(until) });
     }
   }
-  return t('lifetime-forever');
+  return window._localization.t('lifetime-forever');
 }
 
 function ruleTimeLabel(epochSeconds) {
@@ -514,26 +514,26 @@ function renderRuleInspectorCard(rule) {
 
   const grid = document.createElement('div');
   grid.className = 'inspector-grid';
-  appendInspectorRow(grid, t('inspector-action'), `${ruleActionLabel(rule.action)}${rule.isDisabled ? t('rule-disabled-suffix') : ''}`);
+  appendInspectorRow(grid, window._localization.t('inspector-action'), `${ruleActionLabel(rule.action)}${rule.isDisabled ? window._localization.t('rule-disabled-suffix') : ''}`);
   const executable = rule.primaryExecutable
     ? (rule.viaExecutable ? `${rule.primaryExecutable} via ${rule.viaExecutable}` : rule.primaryExecutable)
-    : (rule.viaExecutable ? t('any-process-via', { via: rule.viaExecutable }) : t('any-process'));
-  appendInspectorRow(grid, t('inspector-priority'), rulePriorityLabel(rule.priority));
-  appendInspectorRow(grid, t('inspector-executable'), executable);
-  appendInspectorRow(grid, t('inspector-direction'), ruleDirectionLabelLong(rule.direction));
-  appendInspectorRow(grid, t('inspector-remote'), ruleRemoteInspectorLabel(rule.remotePattern));
-  appendInspectorRow(grid, t('inspector-protocol'), ruleProtocolInspectorLabel(rule.protocol));
-  appendInspectorRow(grid, t('inspector-port'), rulePortInspectorLabel(rule.port));
-  appendInspectorRow(grid, t('inspector-lifetime'), ruleLifetimeLabel(rule.lifetime));
-  appendInspectorRow(grid, t('inspector-created'), ruleTimeLabel(rule.creationDate));
-  appendInspectorRow(grid, t('inspector-modified'), ruleTimeLabel(rule.modificationDate));
+    : (rule.viaExecutable ? window._localization.t('any-process-via', { via: rule.viaExecutable }) : window._localization.t('any-process'));
+  appendInspectorRow(grid, window._localization.t('inspector-priority'), rulePriorityLabel(rule.priority));
+  appendInspectorRow(grid, window._localization.t('inspector-executable'), executable);
+  appendInspectorRow(grid, window._localization.t('inspector-direction'), ruleDirectionLabelLong(rule.direction));
+  appendInspectorRow(grid, window._localization.t('inspector-remote'), ruleRemoteInspectorLabel(rule.remotePattern));
+  appendInspectorRow(grid, window._localization.t('inspector-protocol'), ruleProtocolInspectorLabel(rule.protocol));
+  appendInspectorRow(grid, window._localization.t('inspector-port'), rulePortInspectorLabel(rule.port));
+  appendInspectorRow(grid, window._localization.t('inspector-lifetime'), ruleLifetimeLabel(rule.lifetime));
+  appendInspectorRow(grid, window._localization.t('inspector-created'), ruleTimeLabel(rule.creationDate));
+  appendInspectorRow(grid, window._localization.t('inspector-modified'), ruleTimeLabel(rule.modificationDate));
   card.appendChild(grid);
 
   const notesBlock = document.createElement('div');
   notesBlock.className = 'inspector-box-block';
   const notesHeadline = document.createElement('div');
   notesHeadline.className = 'inspector-box-headline';
-  notesHeadline.textContent = t('notes-headline');
+  notesHeadline.textContent = window._localization.t('notes-headline');
   notesBlock.appendChild(notesHeadline);
   const notesBox = document.createElement('div');
   notesBox.className = 'inspector-box';
@@ -550,7 +550,7 @@ function renderRuleInspectorCard(rule) {
   const notesSave = document.createElement('button');
   notesSave.type = 'button';
   notesSave.className = 'edit-dialog-button is-primary inspector-save-button';
-  notesSave.textContent = t('btn-save-notes');
+  notesSave.textContent = window._localization.t('btn-save-notes');
   notesSave.addEventListener('click', () => {
     saveRuleNotes(rule, notesInput.value);
   });
@@ -573,7 +573,7 @@ function renderRulesInspector() {
   if (selectedRules.length === 0) {
     const hint = document.createElement('div');
     hint.className = 'empty-state';
-    hint.textContent = t('rules-inspect-hint');
+    hint.textContent = window._localization.t('rules-inspect-hint');
     details.appendChild(hint);
     return;
   }
@@ -600,12 +600,12 @@ function updateRuleRemoteValueVisibility() {
   const remotePatternType = Number.parseInt(ruleDialogRemoteType.value, 10);
   const hideRemoteValue = remotePatternType === 1 || remotePatternType === 2;
   const headline = remotePatternType === 3
-    ? t('dlg-remote-hosts')
+    ? window._localization.t('dlg-remote-hosts')
     : remotePatternType === 4
-      ? t('dlg-remote-domains')
+      ? window._localization.t('dlg-remote-domains')
       : remotePatternType === 5
-        ? t('dlg-remote-addresses')
-        : t('dlg-remote-value-label');
+        ? window._localization.t('dlg-remote-addresses')
+        : window._localization.t('dlg-remote-value-label');
   const labelTextNode = ruleDialogRemoteValueLabel.querySelector('span');
   if (labelTextNode) {
     labelTextNode.textContent = headline;
@@ -635,7 +635,7 @@ function ruleModalPayloadFromInputs() {
 
   const priority = Number.parseInt(ruleDialogPriority.value, 10);
   if (!Number.isFinite(priority) || priority < 0 || priority > 255) {
-    setRuleDialogError(t('err-priority-range'));
+    setRuleDialogError(window._localization.t('err-priority-range'));
     return null;
   }
 
@@ -643,7 +643,7 @@ function ruleModalPayloadFromInputs() {
   const protocol = Number.parseInt(ruleDialogProtocol.value, 10);
   const remotePatternType = Number.parseInt(ruleDialogRemoteType.value, 10);
   if (!Number.isFinite(direction) || !Number.isFinite(protocol) || !Number.isFinite(remotePatternType)) {
-    setRuleDialogError(t('err-direction-required'));
+    setRuleDialogError(window._localization.t('err-direction-required'));
     return null;
   }
 
@@ -724,7 +724,7 @@ function ensureRuleDialog() {
 
   const title = document.createElement('h2');
   title.className = 'edit-dialog-title';
-  title.textContent = t('dlg-add-rule-title');
+  title.textContent = window._localization.t('dlg-add-rule-title');
   form.appendChild(title);
 
   const hiddenId = document.createElement('input');
@@ -734,7 +734,7 @@ function ensureRuleDialog() {
 
   const primaryLabel = document.createElement('label');
   primaryLabel.className = 'edit-dialog-label';
-  primaryLabel.textContent = t('dlg-primary-exe-label');
+  primaryLabel.textContent = window._localization.t('dlg-primary-exe-label');
   const primaryInput = document.createElement('input');
   primaryInput.className = 'edit-dialog-input';
   primaryInput.type = 'text';
@@ -743,7 +743,7 @@ function ensureRuleDialog() {
 
   const viaLabel = document.createElement('label');
   viaLabel.className = 'edit-dialog-label';
-  viaLabel.textContent = t('dlg-via-exe-label');
+  viaLabel.textContent = window._localization.t('dlg-via-exe-label');
   const viaInput = document.createElement('input');
   viaInput.className = 'edit-dialog-input';
   viaInput.type = 'text';
@@ -755,7 +755,7 @@ function ensureRuleDialog() {
 
   const actionLabel = document.createElement('label');
   actionLabel.className = 'edit-dialog-label rule-modal-half';
-  actionLabel.textContent = t('dlg-action-label');
+  actionLabel.textContent = window._localization.t('dlg-action-label');
   const actionSelect = document.createElement('select');
   actionSelect.className = 'edit-dialog-input';
   actionSelect.innerHTML = `<option value="allow">${t('action-allow')}</option><option value="deny">${t('action-deny')}</option>`;
@@ -764,7 +764,7 @@ function ensureRuleDialog() {
 
   const directionLabel = document.createElement('label');
   directionLabel.className = 'edit-dialog-label rule-modal-half';
-  directionLabel.textContent = t('dlg-direction-label');
+  directionLabel.textContent = window._localization.t('dlg-direction-label');
   const directionSelect = document.createElement('select');
   directionSelect.className = 'edit-dialog-input';
   directionSelect.innerHTML = `<option value="1">${t('dir-out')}</option><option value="2">${t('dir-in')}</option><option value="3">${t('dir-both')}</option>`;
@@ -774,7 +774,7 @@ function ensureRuleDialog() {
 
   const remoteTypeLabel = document.createElement('label');
   remoteTypeLabel.className = 'edit-dialog-label';
-  remoteTypeLabel.textContent = t('dlg-remote-type-label');
+  remoteTypeLabel.textContent = window._localization.t('dlg-remote-type-label');
   const remoteTypeSelect = document.createElement('select');
   remoteTypeSelect.className = 'edit-dialog-input';
   remoteTypeSelect.innerHTML = [
@@ -790,7 +790,7 @@ function ensureRuleDialog() {
   const remoteValueLabel = document.createElement('label');
   remoteValueLabel.className = 'edit-dialog-label rule-modal-collapsible';
   const remoteValueTitle = document.createElement('span');
-  remoteValueTitle.textContent = t('dlg-remote-value-label');
+  remoteValueTitle.textContent = window._localization.t('dlg-remote-value-label');
   remoteValueLabel.appendChild(remoteValueTitle);
   const remoteValueInput = document.createElement('input');
   remoteValueInput.className = 'edit-dialog-input';
@@ -806,7 +806,7 @@ function ensureRuleDialog() {
 
   const protocolLabel = document.createElement('label');
   protocolLabel.className = 'edit-dialog-label rule-modal-half';
-  protocolLabel.textContent = t('dlg-protocol-label');
+  protocolLabel.textContent = window._localization.t('dlg-protocol-label');
   const protocolSelect = document.createElement('select');
   protocolSelect.className = 'edit-dialog-input';
   protocolSelect.innerHTML = [
@@ -822,11 +822,11 @@ function ensureRuleDialog() {
 
   const portLabel = document.createElement('label');
   portLabel.className = 'edit-dialog-label rule-modal-half';
-  portLabel.textContent = t('dlg-ports-label');
+  portLabel.textContent = window._localization.t('dlg-ports-label');
   const portInput = document.createElement('input');
   portInput.className = 'edit-dialog-input';
   portInput.type = 'text';
-  portInput.placeholder = t('dlg-port-placeholder');
+  portInput.placeholder = window._localization.t('dlg-port-placeholder');
   portLabel.appendChild(portInput);
   protocolPortRow.appendChild(portLabel);
   form.appendChild(protocolPortRow);
@@ -836,7 +836,7 @@ function ensureRuleDialog() {
 
   const priorityLabel = document.createElement('label');
   priorityLabel.className = 'edit-dialog-label rule-modal-half';
-  priorityLabel.textContent = t('dlg-priority-label');
+  priorityLabel.textContent = window._localization.t('dlg-priority-label');
   const priorityInput = document.createElement('input');
   priorityInput.className = 'edit-dialog-input';
   priorityInput.type = 'number';
@@ -850,13 +850,13 @@ function ensureRuleDialog() {
   const enabledInput = document.createElement('input');
   enabledInput.type = 'checkbox';
   enabledLabel.appendChild(enabledInput);
-  enabledLabel.appendChild(document.createTextNode(t('dlg-rule-is-enabled')));
+  enabledLabel.appendChild(document.createTextNode(window._localization.t('dlg-rule-is-enabled')));
   priorityEnabledRow.appendChild(enabledLabel);
   form.appendChild(priorityEnabledRow);
 
   const notesLabel = document.createElement('label');
   notesLabel.className = 'edit-dialog-label';
-  notesLabel.textContent = t('dlg-notes-label');
+  notesLabel.textContent = window._localization.t('dlg-notes-label');
   const notesInput = document.createElement('textarea');
   notesInput.className = 'edit-dialog-textarea';
   notesInput.rows = 3;
@@ -873,14 +873,14 @@ function ensureRuleDialog() {
   const cancelButton = document.createElement('button');
   cancelButton.type = 'button';
   cancelButton.className = 'edit-dialog-button';
-  cancelButton.textContent = t('btn-cancel');
+  cancelButton.textContent = window._localization.t('btn-cancel');
   cancelButton.addEventListener('click', () => dialog.close());
   actions.appendChild(cancelButton);
 
   const saveButton = document.createElement('button');
   saveButton.type = 'submit';
   saveButton.className = 'edit-dialog-button is-primary';
-  saveButton.textContent = t('btn-save');
+  saveButton.textContent = window._localization.t('btn-save');
   actions.appendChild(saveButton);
 
   form.appendChild(actions);
@@ -920,7 +920,7 @@ function openRuleModal(rule) {
   }
 
   if (rule) {
-    ruleDialogTitle.textContent = t('dlg-edit-rule-title');
+    ruleDialogTitle.textContent = window._localization.t('dlg-edit-rule-title');
     ruleDialogId.value = String(rule.id);
     ruleDialogPrimary.value = rule.primaryExecutable || '';
     ruleDialogVia.value = rule.viaExecutable || '';
@@ -934,7 +934,7 @@ function openRuleModal(rule) {
     ruleDialogEnabled.checked = !rule.isDisabled;
     ruleDialogNotes.value = rule.notes || '';
   } else {
-    ruleDialogTitle.textContent = t('dlg-add-rule-title');
+    ruleDialogTitle.textContent = window._localization.t('dlg-add-rule-title');
     ruleDialogId.value = '';
     ruleDialogPrimary.value = '';
     ruleDialogVia.value = '';
@@ -960,11 +960,11 @@ function openRuleModal(rule) {
 
 function getLastColumnSortOptions() {
   return [
-    { key: 'port',             label: t('sort-port-protocol') },
-    { key: 'modificationDate', label: t('sort-modified') },
-    { key: 'creationDate',     label: t('sort-created') },
-    { key: 'precedence',       label: t('sort-precedence') },
-    { key: 'priority',         label: t('sort-priority') },
+    { key: 'port',             label: window._localization.t('sort-port-protocol') },
+    { key: 'modificationDate', label: window._localization.t('sort-modified') },
+    { key: 'creationDate',     label: window._localization.t('sort-created') },
+    { key: 'precedence',       label: window._localization.t('sort-precedence') },
+    { key: 'priority',         label: window._localization.t('sort-priority') },
   ];
 }
 
@@ -983,11 +983,11 @@ function renderRuleTable(ruleList) {
   const header = document.createElement('tr');
   const columns = [
     { title: '', sortKey: 'enabled' },
-    { title: t('col-action'), sortKey: 'action' },
-    { title: t('col-process'), sortKey: 'process' },
-    { title: t('col-dir'), sortKey: 'direction' },
-    { title: t('col-server'), sortKey: 'remote' },
-    { title: t('col-port'), sortKey: 'port', sortPopup: true },
+    { title: window._localization.t('col-action'), sortKey: 'action' },
+    { title: window._localization.t('col-process'), sortKey: 'process' },
+    { title: window._localization.t('col-dir'), sortKey: 'direction' },
+    { title: window._localization.t('col-server'), sortKey: 'remote' },
+    { title: window._localization.t('col-port'), sortKey: 'port', sortPopup: true },
     { title: '', sortKey: null, addButton: true },
   ];
   for (const column of columns) {
@@ -1037,9 +1037,9 @@ function renderRuleTable(ruleList) {
       const addBtn = document.createElement('button');
       addBtn.type = 'button';
       addBtn.className = 'blocklist-add-button';
-      addBtn.setAttribute('aria-label', t('btn-add-rule'));
-      addBtn.title = t('btn-add-rule');
-      addBtn.innerHTML = '<svg width="14" height="14" fill="currentColor"><use href="#btn-add"/></svg>';
+      addBtn.setAttribute('aria-label', window._localization.t('btn-add-rule'));
+      addBtn.title = window._localization.t('btn-add-rule');
+      addBtn.innerHTML = '<svg width="14" height="14" fill="currentColor"><use href="sprite/sprite.svg#btn-add"/></svg>';
       addBtn.addEventListener('click', () => {
         openRuleModal(null);
       });
@@ -1049,9 +1049,9 @@ function renderRuleTable(ruleList) {
       deleteSelectedBtn.type = 'button';
       deleteSelectedBtn.className = 'blocklist-add-button';
       deleteSelectedBtn.setAttribute('data-role', 'delete-selected-rules');
-      deleteSelectedBtn.setAttribute('aria-label', t('btn-delete-rules'));
-      deleteSelectedBtn.title = t('btn-delete-rules');
-      deleteSelectedBtn.innerHTML = '<svg width="18" height="18" fill="currentColor"><use href="#btn-remove"/></svg>';
+      deleteSelectedBtn.setAttribute('aria-label', window._localization.t('btn-delete-rules'));
+      deleteSelectedBtn.title = window._localization.t('btn-delete-rules');
+      deleteSelectedBtn.innerHTML = '<svg width="18" height="18" fill="currentColor"><use href="sprite/sprite.svg#btn-remove"/></svg>';
       deleteSelectedBtn.disabled = ruleSelection.size === 0;
       deleteSelectedBtn.addEventListener('click', () => {
         if (ruleSelection.size === 0) {
@@ -1059,7 +1059,7 @@ function renderRuleTable(ruleList) {
         }
         const hasFactory = rulesCurrentList.some((r) => ruleSelection.has(r.id) && r.id < 0);
         if (hasFactory) {
-          alert(t('alert-factory-rule'));
+          alert(window._localization.t('alert-factory-rule'));
           return;
         }
         if (window.app && typeof window.app.sendAction === 'function') {
@@ -1098,7 +1098,7 @@ function renderRuleTable(ruleList) {
     checkbox.type = 'checkbox';
     checkbox.className = 'rule-enable-checkbox';
     checkbox.checked = !rule.isDisabled;
-    checkbox.title = rule.isDisabled ? t('disabled') : t('enabled');
+    checkbox.title = rule.isDisabled ? window._localization.t('disabled') : window._localization.t('enabled');
     checkbox.addEventListener('click', (event) => {
       event.stopPropagation();
     });
@@ -1108,7 +1108,7 @@ function renderRuleTable(ruleList) {
         return;
       }
       if (rule.id < 0 && !rule.isDisabled) {
-        const confirmed = confirm(t('confirm-disable-factory-rule'));
+        const confirmed = confirm(window._localization.t('confirm-disable-factory-rule'));
         if (!confirmed) {
           checkbox.checked = true;
           return;
@@ -1186,12 +1186,12 @@ function renderRuleTable(ruleList) {
     const editBtn = document.createElement('button');
     editBtn.type = 'button';
     editBtn.className = 'rule-row-btn';
-    editBtn.title = t('btn-edit-rule');
-    editBtn.innerHTML = '<svg width="14" height="14" fill="currentColor"><use href="#rule-edit"/></svg>';
+    editBtn.title = window._localization.t('btn-edit-rule');
+    editBtn.innerHTML = '<svg width="14" height="14" fill="currentColor"><use href="sprite/sprite.svg#rule-edit"/></svg>';
     editBtn.addEventListener('click', (event) => {
       event.stopPropagation();
       if (rule.id < 0) {
-        alert(t('alert-factory-rule'));
+        alert(window._localization.t('alert-factory-rule'));
         return;
       }
       openRuleModal(rule);
@@ -1201,12 +1201,12 @@ function renderRuleTable(ruleList) {
     const deleteBtn = document.createElement('button');
     deleteBtn.type = 'button';
     deleteBtn.className = 'rule-row-btn rule-row-btn-danger';
-    deleteBtn.title = t('btn-delete-rule');
-    deleteBtn.innerHTML = '<svg width="14" height="14" fill="currentColor"><use href="#rule-delete"/></svg>';
+    deleteBtn.title = window._localization.t('btn-delete-rule');
+    deleteBtn.innerHTML = '<svg width="14" height="14" fill="currentColor"><use href="sprite/sprite.svg#rule-delete"/></svg>';
     deleteBtn.addEventListener('click', (event) => {
       event.stopPropagation();
       if (rule.id < 0) {
-        alert(t('alert-factory-rule'));
+        alert(window._localization.t('alert-factory-rule'));
         return;
       }
       if (window.app && typeof window.app.sendAction === 'function') {
@@ -1230,7 +1230,7 @@ function renderRuleTable(ruleList) {
     });
     row.addEventListener('dblclick', () => {
       if (rule.id < 0) {
-        alert(t('alert-factory-rule'));
+        alert(window._localization.t('alert-factory-rule'));
         return;
       }
       openRuleModal(rule);
@@ -1296,7 +1296,7 @@ function applyRulesData(rules, animateRowIds) {
   if (rulesDisplayedList.length === 0) {
     const empty = document.createElement('div');
     empty.className = 'empty-state';
-    empty.textContent = normalizedRulesSearchQuery().length > 0 ? t('empty-no-matching-rules') : t('empty-no-rules');
+    empty.textContent = normalizedRulesSearchQuery().length > 0 ? window._localization.t('empty-no-matching-rules') : window._localization.t('empty-no-rules');
     container.appendChild(empty);
   } else {
     container.appendChild(renderRuleTable(rulesDisplayedList));

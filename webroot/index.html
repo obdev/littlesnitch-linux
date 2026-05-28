@@ -1,330 +1,306 @@
 <!-- SPDX-License-Identifier: GPL-2.0 -->
 <!-- Copyright (C) 2026 Objective Development Software GmbH -->
-
 <!doctype html>
 <html lang="en">
-
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Little Snitch for Linux</title><!-- updated by applyLocalizationToDOM -->
-  <link rel="manifest" href="manifest.json" />
-  <meta name="theme-color" content="#0d6abf" />
-  <link rel="icon" href="littlesnitch-192.png" sizes="192x192" type="image/png">
-  <link rel="apple-touch-icon" href="littlesnitch-192.png" />
-  <script src="theme-init.js"></script>
-  <link rel="stylesheet" href="styles.css" />
-  <link rel="stylesheet" href="connections.css" />
-  <link rel="stylesheet" href="blocklists.css" />
-  <link rel="stylesheet" href="rules.css" />
-  <link rel="stylesheet" href="uPlot.min.css" />
-  <link rel="stylesheet" href="traffic.css" />
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Little Snitch for Linux</title><!-- updated by applyLocalizationToDOM -->
+    <link rel="manifest" href="manifest.json"/>
+    <meta name="theme-color" content="#0d6abf"/>
+    <link rel="icon" href="littlesnitch-192.png" sizes="192x192" type="image/png">
+    <link rel="apple-touch-icon" href="littlesnitch-192.png"/>
+    <script src="js/header-app.min.js"></script>
+    <link rel="stylesheet" href="css/style.min.css"/>
 </head>
-
 <body>
-  <!-- SVG symbols available throughout the app -->
-  <svg width="0" height="0" class="svg-defs" xmlns="http://www.w3.org/2000/svg">
-    <defs>
-      <symbol id="search-loupe" viewBox="0 -960 960 960">
-        <path d="M380-320q-109 0-184.5-75.5T120-580q0-109 75.5-184.5T380-840q109 0 184.5 75.5T640-580q0 44-14 83t-38 69l224 224q11 11 11 28t-11 28q-11 11-28 11t-28-11L532-372q-30 24-69 38t-83 14Zm0-80q75 0 127.5-52.5T560-580q0-75-52.5-127.5T380-760q-75 0-127.5 52.5T200-580q0 75 52.5 127.5T380-400Z"/>
-      </symbol>
-      <symbol id="btn-search-clear" viewBox="0 -960 960 960">
-        <path d="m480-424 116 116q11 11 28 11t28-11q11-11 11-28t-11-28L536-480l116-116q11-11 11-28t-11-28q-11-11-28-11t-28 11L480-536 364-652q-11-11-28-11t-28 11q-11 11-11 28t11 28l116 116-116 116q-11 11-11 28t11 28q11 11 28 11t28-11l116-116Zm0 344q-83 0-156-31.5T197-197q-54-54-85.5-127T80-480q0-83 31.5-156T197-763q54-54 127-85.5T480-880q83 0 156 31.5T763-763q54 54 85.5 127T880-480q0 83-31.5 156T763-197q-54 54-127 85.5T480-80Z"/>
-      </symbol>
-      <symbol id="rule-outgoing" viewBox="0 0 20 20">
-          <path d="M10.1541722,3.75 C11.4914503,3.75 11.9763797,3.88923842 12.4652686,4.15069906 C12.9541574,4.41215969 13.3378403,4.79584256 13.5993009,5.28473144 L13.6915863,5.46955165 C13.8789806,5.8768407 13.9842851,6.35217799 13.9983725,7.35486756 L14,7.75 L12.67,7.75 L12.67,7.5958278 C12.67,6.57738592 12.6064978,6.2485443 12.4264894,5.91195793 C12.2889845,5.65484611 12.0951539,5.46101551 11.8380421,5.32351061 C11.5254976,5.15635999 11.219631,5.08966617 10.3621088,5.08099129 L5.8458278,5.08 C4.82738592,5.08 4.4985443,5.14350225 4.16195793,5.32351061 C3.90484611,5.46101551 3.71101551,5.65484611 3.57351061,5.91195793 C3.40635999,6.22450242 3.33966617,6.53036904 3.33099129,7.38789123 L3.33,12.4041722 C3.33,13.4226141 3.39350225,13.7514557 3.57351061,14.0880421 C3.71101551,14.3451539 3.90484611,14.5389845 4.16195793,14.6764894 C4.47450242,14.84364 4.78036904,14.9103338 5.63789123,14.9190087 L10.1541722,14.92 C11.1726141,14.92 11.5014557,14.8564978 11.8380421,14.6764894 C12.0951539,14.5389845 12.2889845,14.3451539 12.4264894,14.0880421 C12.59364,13.7754976 12.6603338,13.469631 12.6690087,12.6121088 L12.67,12.25 L14,12.25 L14,12.4041722 C14,13.7414503 13.8607616,14.2263797 13.5993009,14.7152686 C13.3378403,15.2041574 12.9541574,15.5878403 12.4652686,15.8493009 L12.2804483,15.9415863 C11.8418294,16.1433956 11.3242905,16.25 10.1541722,16.25 L5.8458278,16.25 C4.50854969,16.25 4.02362033,16.1107616 3.53473144,15.8493009 C3.04584256,15.5878403 2.66215969,15.2041574 2.40069906,14.7152686 L2.30841372,14.5304483 C2.12101936,14.1231593 2.01571494,13.647822 2.00162755,12.6451324 L2,7.5958278 C2,6.25854969 2.13923842,5.77362033 2.40069906,5.28473144 C2.66215969,4.79584256 3.04584256,4.41215969 3.53473144,4.15069906 L3.71955165,4.05841372 C4.1268407,3.87101936 4.60217799,3.76571494 5.60486756,3.75162755 L10.1541722,3.75 Z M16.9596194,6.79038059 L19.4974869,9.3282481 C19.8684856,9.699246 19.8684856,10.300754 19.4974874,10.6717514 L16.9596194,13.2096194 C16.7057786,13.4634602 16.2942214,13.4634602 16.0403806,13.2096194 C15.7865398,12.9557786 15.7865398,12.5442214 16.0403806,12.2903806 L17.68,10.65 L7,10.65 C6.64101491,10.65 6.35,10.3589851 6.35,10 C6.35,9.64101491 6.64101491,9.35 7,9.35 L17.68,9.35 L16.0403806,7.70961941 C15.7865398,7.45577862 15.7865398,7.04422138 16.0403806,6.79038059 C16.2942214,6.5365398 16.7057786,6.5365398 16.9596194,6.79038059 Z" />
-      </symbol>
-      <symbol id="rule-incoming" viewBox="0 0 20 20">
-          <path d="M10.1541722,3.75 C11.4914503,3.75 11.9763797,3.88923842 12.4652686,4.15069906 C12.9541574,4.41215969 13.3378403,4.79584256 13.5993009,5.28473144 L13.6915863,5.46955165 C13.8789806,5.8768407 13.9842851,6.35217799 13.9983725,7.35486756 L14,7.75 L12.67,7.75 L12.67,7.5958278 C12.67,6.57738592 12.6064978,6.2485443 12.4264894,5.91195793 C12.2889845,5.65484611 12.0951539,5.46101551 11.8380421,5.32351061 C11.5254976,5.15635999 11.219631,5.08966617 10.3621088,5.08099129 L5.8458278,5.08 C4.82738592,5.08 4.4985443,5.14350225 4.16195793,5.32351061 C3.90484611,5.46101551 3.71101551,5.65484611 3.57351061,5.91195793 C3.40635999,6.22450242 3.33966617,6.53036904 3.33099129,7.38789123 L3.33,12.4041722 C3.33,13.4226141 3.39350225,13.7514557 3.57351061,14.0880421 C3.71101551,14.3451539 3.90484611,14.5389845 4.16195793,14.6764894 C4.47450242,14.84364 4.78036904,14.9103338 5.63789123,14.9190087 L10.1541722,14.92 C11.1726141,14.92 11.5014557,14.8564978 11.8380421,14.6764894 C12.0951539,14.5389845 12.2889845,14.3451539 12.4264894,14.0880421 C12.59364,13.7754976 12.6603338,13.469631 12.6690087,12.6121088 L12.67,12.25 L14,12.25 L14,12.4041722 C14,13.7414503 13.8607616,14.2263797 13.5993009,14.7152686 C13.3378403,15.2041574 12.9541574,15.5878403 12.4652686,15.8493009 L12.2804483,15.9415863 C11.8418294,16.1433956 11.3242905,16.25 10.1541722,16.25 L5.8458278,16.25 C4.50854969,16.25 4.02362033,16.1107616 3.53473144,15.8493009 C3.04584256,15.5878403 2.66215969,15.2041574 2.40069906,14.7152686 L2.30841372,14.5304483 C2.12101936,14.1231593 2.01571494,13.647822 2.00162755,12.6451324 L2,7.5958278 C2,6.25854969 2.13923842,5.77362033 2.40069906,5.28473144 C2.66215969,4.79584256 3.04584256,4.41215969 3.53473144,4.15069906 L3.71955165,4.05841372 C4.1268407,3.87101936 4.60217799,3.76571494 5.60486756,3.75162755 L10.1541722,3.75 Z M9.70961941,6.79038059 C9.9634602,7.04422138 9.9634602,7.45577862 9.70961941,7.70961941 L8.068264,9.35 L18,9.35 C18.3589851,9.35 18.65,9.64101491 18.65,10 C18.65,10.3589851 18.3589851,10.65 18,10.65 L8.068264,10.65 L9.70961941,12.2903806 C9.9634602,12.5442214 9.9634602,12.9557786 9.70961941,13.2096194 C9.45577862,13.4634602 9.04422138,13.4634602 8.79038059,13.2096194 L6.25251308,10.6717519 C5.88151439,10.300754 5.88151439,9.699246 6.25251259,9.32824859 L8.79038059,6.79038059 C9.04422138,6.5365398 9.45577862,6.5365398 9.70961941,6.79038059 Z" />
-      </symbol>
-      <symbol id="rule-bidirectional" viewBox="0 0 20 20">
-          <path d="M5.60486756,3.75162755 L10.1541722,3.75 C11.4914503,3.75 11.9763797,3.88923842 12.4652686,4.15069906 C12.9541574,4.41215969 13.3378403,4.79584256 13.5993009,5.28473144 L13.6915863,5.46955165 C13.8789806,5.8768407 13.9842851,6.35217799 13.9983725,7.35486756 L14,7.75 L12.67,7.75 L12.67,7.5958278 C12.67,6.57738592 12.6064978,6.2485443 12.4264894,5.91195793 C12.2889845,5.65484611 12.0951539,5.46101551 11.8380421,5.32351061 C11.5254976,5.15635999 11.219631,5.08966617 10.3621088,5.08099129 L5.8458278,5.08 C4.82738592,5.08 4.4985443,5.14350225 4.16195793,5.32351061 C3.90484611,5.46101551 3.71101551,5.65484611 3.57351061,5.91195793 C3.40635999,6.22450242 3.33966617,6.53036904 3.33099129,7.38789123 L3.33,12.4041722 C3.33,13.4226141 3.39350225,13.7514557 3.57351061,14.0880421 C3.71101551,14.3451539 3.90484611,14.5389845 4.16195793,14.6764894 C4.47450242,14.84364 4.78036904,14.9103338 5.63789123,14.9190087 L10.1541722,14.92 C11.1726141,14.92 11.5014557,14.8564978 11.8380421,14.6764894 C12.0951539,14.5389845 12.2889845,14.3451539 12.4264894,14.0880421 C12.59364,13.7754976 12.6603338,13.469631 12.6690087,12.6121088 L12.67,12.25 L14,12.25 L14,12.4041722 C14,13.7414503 13.8607616,14.2263797 13.5993009,14.7152686 C13.3378403,15.2041574 12.9541574,15.5878403 12.4652686,15.8493009 L12.2804483,15.9415863 C11.8418294,16.1433956 11.3242905,16.25 10.1541722,16.25 L5.8458278,16.25 C4.50854969,16.25 4.02362033,16.1107616 3.53473144,15.8493009 C3.04584256,15.5878403 2.66215969,15.2041574 2.40069906,14.7152686 L2.30841372,14.5304483 C2.12101936,14.1231593 2.01571494,13.647822 2.00162755,12.6451324 L2,7.5958278 C2,6.25854969 2.13923842,5.77362033 2.40069906,5.28473144 C2.66215969,4.79584256 3.04584256,4.41215969 3.53473144,4.15069906 L3.71955165,4.05841372 C4.1268407,3.87101936 4.60217799,3.76571494 5.60486756,3.75162755 Z M16.9596194,6.79038059 L19.4974869,9.3282481 C19.8684856,9.699246 19.8684856,10.300754 19.4974874,10.6717514 L16.9596194,13.2096194 C16.7057786,13.4634602 16.2942214,13.4634602 16.0403806,13.2096194 C15.7865398,12.9557786 15.7865398,12.5442214 16.0403806,12.2903806 L17.680264,10.65 L8.068264,10.65 L9.70961941,12.2903806 C9.9634602,12.5442214 9.9634602,12.9557786 9.70961941,13.2096194 C9.45577862,13.4634602 9.04422138,13.4634602 8.79038059,13.2096194 L6.25251308,10.6717519 C5.88151439,10.300754 5.88151439,9.699246 6.25251259,9.32824859 L8.79038059,6.79038059 C9.04422138,6.5365398 9.45577862,6.5365398 9.70961941,6.79038059 C9.9634602,7.04422138 9.9634602,7.45577862 9.70961941,7.70961941 L8.068264,9.35 L17.680264,9.35 L16.0403806,7.70961941 C15.7865398,7.45577862 15.7865398,7.04422138 16.0403806,6.79038059 C16.2942214,6.5365398 16.7057786,6.5365398 16.9596194,6.79038059 Z" />
-      </symbol>
-      <symbol id="rule-allow" viewBox="0 0 18 18">
-          <path d="M9,0 C13.9705627,-1.77635684e-15 18,4.02943725 18,9 C18,13.9705627 13.9705627,18 9,18 C4.02943725,18 0,13.9705627 0,9 C0,4.02943725 4.02943725,0 9,0 Z" fill="#72C419" />
-      </symbol>
-      <symbol id="rule-deny" viewBox="0 0 18 18">
-          <path d="M9,0 C13.9705627,-1.77635684e-15 18,4.02943725 18,9 C18,13.9705627 13.9705627,18 9,18 C4.02943725,18 0,13.9705627 0,9 C0,4.02943725 4.02943725,0 9,0 Z" fill="#FF3C00" />
-      </symbol>
-      <symbol id="rule-blocklist" viewBox="0 0 18 18">
-          <path d="M9,0 C13.9705627,-1.77635684e-15 18,4.02943725 18,9 C18,13.9705627 13.9705627,18 9,18 C4.02943725,18 0,13.9705627 0,9 C0,4.02943725 4.02943725,0 9,0 Z" id="Rectangle-3" fill="#ff3b30" />
-          <path d="M5,7.5 L13,7.5 C13.8284271,7.5 14.5,8.17157288 14.5,9 C14.5,9.82842712 13.8284271,10.5 13,10.5 L5,10.5 C4.17157288,10.5 3.5,9.82842712 3.5,9 C3.5,8.17157288 4.17157288,7.5 5,7.5 Z" id="Rectangle-6" fill="#FFFFFF" />
-      </symbol>
-      <symbol id="rule-edit" viewBox="0 -960 960 960">
-        <path d="M200-200h57l391-391-57-57-391 391v57Zm-40 80q-17 0-28.5-11.5T120-160v-97q0-16 6-30.5t17-25.5l505-504q12-11 26.5-17t30.5-6q16 0 31 6t26 18l55 56q12 11 17.5 26t5.5 30q0 16-5.5 30.5T817-647L313-143q-11 11-25.5 17t-30.5 6h-97Zm600-584-56-56 56 56Zm-141 85-28-29 57 57-29-28Z"/>
-      </symbol>
-      <symbol id="rule-delete" viewBox="0 -960 960 960">
-        <path d="M280-120q-33 0-56.5-23.5T200-200v-520q-17 0-28.5-11.5T160-760q0-17 11.5-28.5T200-800h160q0-17 11.5-28.5T400-840h160q17 0 28.5 11.5T600-800h160q17 0 28.5 11.5T800-760q0 17-11.5 28.5T760-720v520q0 33-23.5 56.5T680-120H280Zm400-600H280v520h400v-520ZM428.5-291.5Q440-303 440-320v-280q0-17-11.5-28.5T400-640q-17 0-28.5 11.5T360-600v280q0 17 11.5 28.5T400-280q17 0 28.5-11.5Zm160 0Q600-303 600-320v-280q0-17-11.5-28.5T560-640q-17 0-28.5 11.5T520-600v280q0 17 11.5 28.5T560-280q17 0 28.5-11.5ZM280-720v520-520Z"/>
-      </symbol>
-      <symbol id="btn-remove" viewBox="0 -960 960 960">
-        <path d="M200-440v-80h560v80H200Z"/>
-      </symbol>
-      <symbol id="btn-add" viewBox="0 -960 960 960">
-        <path d="M440-440H200v-80h240v-240h80v240h240v80H520v240h-80v-240Z"/>
-      </symbol>
-      <symbol id="info" viewBox="0 -960 960 960">
-        <path d="M440-280h80v-240h-80v240Zm68.5-331.5Q520-623 520-640t-11.5-28.5Q497-680 480-680t-28.5 11.5Q440-657 440-640t11.5 28.5Q463-600 480-600t28.5-11.5ZM480-80q-83 0-156-31.5T197-197q-54-54-85.5-127T80-480q0-83 31.5-156T197-763q54-54 127-85.5T480-880q83 0 156 31.5T763-763q54 54 85.5 127T880-480q0 83-31.5 156T763-197q-54 54-127 85.5T480-80Zm0-80q134 0 227-93t93-227q0-134-93-227t-227-93q-134 0-227 93t-93 227q0 134 93 227t227 93Zm0-320Z"/>
-      </symbol>
-      <symbol id="theme-automatic" viewBox="0 -960 960 960">
-         <path d="M567-364.5Q630-328 702-308q-40 51-98 79.5T481-200q-117 0-198.5-81.5T201-480q0-65 28.5-123t79.5-98q20 72 56.5 135T453-452q51 51 114 87.5ZM743-380q-20-5-39.5-11T665-405q8-18 11.5-36.5T680-480q0-83-58.5-141.5T480-680q-20 0-38.5 3.5T405-665q-8-19-13.5-38T381-742q24-9 49-13.5t51-4.5q117 0 198.5 81.5T761-480q0 26-4.5 51T743-380ZM440-840v-120h80v120h-80Zm0 840v-120h80V0h-80Zm323-706-57-57 85-84 57 56-85 85ZM169-113l-57-56 85-85 57 57-85 84Zm671-327v-80h120v80H840ZM0-440v-80h120v80H0Zm791 328-85-85 57-57 84 85-56 57ZM197-706l-84-85 56-57 85 85-57 57Z"/>
-      </symbol>
-      <symbol id="theme-dark" viewBox="0 -960 960 960">
-        <path d="M480-120q-150 0-255-105T120-480q0-150 105-255t255-105q14 0 27.5 1t26.5 3q-41 29-65.5 75.5T444-660q0 90 63 153t153 63q55 0 101-24.5t75-65.5q2 13 3 26.5t1 27.5q0 150-105 255T480-120Z"/>
-      </symbol>
-      <symbol id="theme-light" viewBox="0 -960 960 960">
-        <path d="M338.5-338.5Q280-397 280-480t58.5-141.5Q397-680 480-680t141.5 58.5Q680-563 680-480t-58.5 141.5Q563-280 480-280t-141.5-58.5ZM200-440H40v-80h160v80Zm720 0H760v-80h160v80ZM440-760v-160h80v160h-80Zm0 720v-160h80v160h-80ZM256-650l-101-97 57-59 96 100-52 56Zm492 496-97-101 53-55 101 97-57 59Zm-98-550 97-101 59 57-100 96-56-52ZM154-212l101-97 55 53-97 101-59-57Z"/>
-      </symbol>
-      <symbol id="logout" viewBox="0 -960 960 960">
-        <path d="M200-120q-33 0-56.5-23.5T120-200v-560q0-33 23.5-56.5T200-840h280v80H200v560h280v80H200Zm440-160-55-58 102-102H360v-80h327L585-622l55-58 200 200-200 200Z"/>
-      </symbol>
-      <symbol id="details-differ-red" viewBox="0 0 18 18">
-        <path fill="#ff3b30" fill-rule="nonzero" d="m10.014 16.606-.006.003-.012.012-.068.058za1.5 1.5 0 0 1-.698.36l-.094.018-.013.001a2 2 0 0 1-.132.013h-.142a2 2 0 0 1-.144-.013l-.013-.001a1.5 1.5 0 0 1-.787-.374l-.097-.096-5.5-6a1.5 1.5 0 1 1 2.212-2.028L7.5 11.644V2.5a1.5 1.5 0 0 1 3 0v9.143l2.894-3.157a1.5 1.5 0 1 1 2.212 2.028l-5.5 6z"/>
-      </symbol>
-      <symbol id="details-differ-green" viewBox="0 0 18 18">
-        <path fill="#2b2" fill-rule="nonzero" d="m10.014 16.606-.006.003-.012.012-.068.058za1.5 1.5 0 0 1-.698.36l-.094.018-.013.001a2 2 0 0 1-.132.013h-.142a2 2 0 0 1-.144-.013l-.013-.001a1.5 1.5 0 0 1-.787-.374l-.097-.096-5.5-6a1.5 1.5 0 1 1 2.212-2.028L7.5 11.644V2.5a1.5 1.5 0 0 1 3 0v9.143l2.894-3.157a1.5 1.5 0 1 1 2.212 2.028l-5.5 6z"/>
-      </symbol>
-    </defs>
-  </svg>
-
-  <div class="app-shell">
+<div class="app-shell">
     <header class="app-header">
-      <div class="app-brand">
-        <span class="brand-name">Little Snitch</span><span class="brand-connector" data-i18n="brand-connector"> for </span><span class="brand-platform">Linux</span>
-      </div>
-      <button class="about-button" type="button" aria-label="About Little Snitch for Linux" data-role="about-button" data-i18n-aria-label="about-btn-label">
-        <svg width="28" height="28" fill="currentColor"><use href="#info" /></svg>
-      </button>
-      <div class="offline-indicator" data-role="offline-indicator" hidden aria-live="polite">
-        <span data-i18n="daemon-offline">Daemon offline — reconnecting…</span>
-      </div>
-      <div class="undo-widget" data-role="undo-widget" hidden>
-        <button class="undo-capsule" data-role="undo-bubble" type="button"
-                aria-haspopup="true" aria-expanded="false">
+        <div class="app-brand">
+            <span class="brand-name">Little Snitch</span><span class="brand-connector"
+                                                               data-i18n="brand-connector"> for </span><span
+                class="brand-platform">Linux</span>
+        </div>
+        <button class="about-button" type="button" aria-label="About Little Snitch for Linux" data-role="about-button"
+                data-i18n-aria-label="about-btn-label">
+            <svg width="28" height="28" fill="currentColor">
+                <use href="sprite/sprite.svg#info"/>
+            </svg>
+        </button>
+        <div class="offline-indicator" data-role="offline-indicator" hidden aria-live="polite">
+            <span data-i18n="daemon-offline">Daemon offline — reconnecting…</span>
+        </div>
+        <div class="undo-widget" data-role="undo-widget" hidden>
+            <button class="undo-capsule" data-role="undo-bubble" type="button"
+                    aria-haspopup="true" aria-expanded="false">
           <span class="undo-capsule-icon">
-            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                 stroke-linejoin="round">
               <path d="M3 7C3 4.5 5 2.5 8 2.5C11 2.5 13 4.5 13 7C13 9.5 11 11.5 8 11.5"/>
               <polyline points="3,4 3,7 6,7"/>
             </svg>
           </span>
-          <span class="undo-capsule-label" data-role="undo-label"></span>
-        </button>
-        <div class="popup-menu undo-popup" data-role="undo-popup" hidden></div>
-      </div>
-      <label class="filter-switch" data-role="filter-switch" title="Enable or disable network filtering">
-        <input type="checkbox" role="switch" class="filter-switch-input" data-role="filter-switch-input" checked />
-        <span class="filter-switch-track" aria-hidden="true"></span>
-        <span class="filter-switch-label" data-i18n="filter-enabled">Network Filter enabled</span>
-      </label>
-      <div class="header-tabs" role="tablist" aria-label="Sections">
-        <button class="tab is-active" role="tab" aria-selected="true" data-section="connections" data-i18n="tab-connections">Connections</button>
-        <button class="tab" role="tab" aria-selected="false" data-section="blocklists" data-i18n="tab-blocklists">Blocklists</button>
-        <button class="tab" role="tab" aria-selected="false" data-section="rules" data-i18n="tab-rules">Rules</button>
-        <div>
-          <button class="theme-toggle" type="button" aria-label="Theme" data-role="theme-toggle" aria-haspopup="true" aria-expanded="false">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-              <path d="M12 3a9 9 0 1 0 9 9c0-.46-.04-.92-.1-1.36a5.389 5.389 0 0 1-4.4 2.26 5.403 5.403 0 0 1-3.14-9.8c-.44-.06-.9-.1-1.36-.1z"/>
-            </svg>
-          </button>
-          <div class="popup-menu theme-popup" data-role="theme-popup" hidden>
-            <button class="menu-item" type="button" data-role="theme-option" data-value="" data-i18n="theme-os-default">
-              <svg width="18" height="18" fill="currentColor"><use href="#theme-automatic" opacity="0.66"/></svg>
-              OS Default
+                <span class="undo-capsule-label" data-role="undo-label"></span>
             </button>
-            <button class="menu-item" type="button" data-role="theme-option" data-value="light" data-i18n="theme-light">
-              <svg width="18" height="18" fill="currentColor"s><use href="#theme-light" opacity="0.66"/></svg>
-              Light
-            </button>
-            <button class="menu-item" type="button" data-role="theme-option" data-value="dark" data-i18n="theme-dark">
-              <svg width="18" height="18" fill="currentColor"><use href="#theme-dark" opacity="0.66"/></svg>
-              Dark
-            </button>
-          </div>
+            <div class="popup-menu undo-popup" data-role="undo-popup" hidden></div>
         </div>
-        <div data-role="logout-control" hidden>
-          <button class="theme-toggle" type="button" aria-label="Logout" data-role="logout-toggle" data-i18n-aria-label="logout-btn-label" aria-haspopup="true" aria-expanded="false">
-            <svg width="18" height="18" fill="currentColor"><use href="#logout" /></svg>
-          </button>
-          <div class="popup-menu logout-popup" data-role="logout-popup" hidden>
-            <button class="menu-item" type="button" data-role="logout-item"></button>
-          </div>
+        <label class="filter-switch" data-role="filter-switch" title="Enable or disable network filtering">
+            <input type="checkbox" role="switch" class="filter-switch-input" data-role="filter-switch-input" checked/>
+            <span class="filter-switch-track" aria-hidden="true"></span>
+            <span class="filter-switch-label" data-i18n="filter-enabled">Network Filter enabled</span>
+        </label>
+        <div class="header-tabs" role="tablist" aria-label="Sections">
+            <button class="tab is-active" role="tab" aria-selected="true" data-section="connections"
+                    data-i18n="tab-connections">Connections
+            </button>
+            <button class="tab" role="tab" aria-selected="false" data-section="blocklists" data-i18n="tab-blocklists">
+                Blocklists
+            </button>
+            <button class="tab" role="tab" aria-selected="false" data-section="rules" data-i18n="tab-rules">Rules
+            </button>
+            <div>
+                <button class="theme-toggle" type="button" aria-label="Theme" data-role="theme-toggle"
+                        aria-haspopup="true" aria-expanded="false">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"
+                         xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 3a9 9 0 1 0 9 9c0-.46-.04-.92-.1-1.36a5.389 5.389 0 0 1-4.4 2.26 5.403 5.403 0 0 1-3.14-9.8c-.44-.06-.9-.1-1.36-.1z"/>
+                    </svg>
+                </button>
+                <div class="popup-menu theme-popup" data-role="theme-popup" hidden>
+                    <button class="menu-item" type="button" data-role="theme-option" data-value=""
+                            data-i18n="theme-os-default">
+                        <svg width="18" height="18" fill="currentColor">
+                            <use href="sprite/sprite.svg#theme-automatic" opacity="0.66"/>
+                        </svg>
+                        OS Default
+                    </button>
+                    <button class="menu-item" type="button" data-role="theme-option" data-value="light"
+                            data-i18n="theme-light">
+                        <svg width="18" height="18" fill="currentColor" s>
+                            <use href="sprite/sprite.svg#theme-automatic" opacity="0.66"/>
+                        </svg>
+                        Light
+                    </button>
+                    <button class="menu-item" type="button" data-role="theme-option" data-value="dark"
+                            data-i18n="theme-dark">
+                        <svg width="18" height="18" fill="currentColor">
+                            <use href="sprite/sprite.svg#theme-automatic" opacity="0.66"/>
+                        </svg>
+                        Dark
+                    </button>
+                </div>
+            </div>
+            <div data-role="logout-control" hidden>
+                <button class="theme-toggle" type="button" aria-label="Logout" data-role="logout-toggle"
+                        data-i18n-aria-label="logout-btn-label" aria-haspopup="true" aria-expanded="false">
+                    <svg width="18" height="18" fill="currentColor">
+                        <use href="sprite/sprite.svg#logout"/>
+                    </svg>
+                </button>
+                <div class="popup-menu logout-popup" data-role="logout-popup" hidden>
+                    <button class="menu-item" type="button" data-role="logout-item"></button>
+                </div>
+            </div>
         </div>
-      </div>
     </header>
 
     <div class="update-banner" data-role="update-banner" hidden>
-      <span data-role="update-banner-text"></span>
-      <a class="update-banner-btn" data-role="update-download-btn" target="_blank" rel="noopener noreferrer" data-i18n="update-download">Download…</a>
-      <button class="update-banner-btn" data-role="update-snooze-btn" type="button" data-i18n="update-snooze">Remind me later</button>
-      <button class="update-banner-btn" data-role="update-skip-btn" type="button" data-i18n="update-skip">Skip this version</button>
+        <span data-role="update-banner-text"></span>
+        <a class="update-banner-btn" data-role="update-download-btn" target="_blank" rel="noopener noreferrer"
+           data-i18n="update-download">Download…</a>
+        <button class="update-banner-btn" data-role="update-snooze-btn" type="button" data-i18n="update-snooze">Remind
+            me later
+        </button>
+        <button class="update-banner-btn" data-role="update-skip-btn" type="button" data-i18n="update-skip">Skip this
+            version
+        </button>
     </div>
 
-    <dialog class="about-dialog" id="about-dialog" aria-label="About Little Snitch for Linux" data-i18n-aria-label="about-btn-label">
-      <div class="about-dialog-content">
-        <button class="about-close-button" type="button" aria-label="Close">×</button>
-        <img class="about-icon" src="littlesnitch-192.png" alt="Little Snitch for Linux icon" width="96" height="96" data-i18n-alt="about-icon-alt" />
-        <h1 class="about-name" data-i18n="app-title">Little Snitch for Linux</h1>
-        <div class="about-version" data-role="about-version"></div>
-        <div class="about-update-info" data-role="about-update-info"></div>
-        <div class="about-commits">
-          <span class="about-commit-label" data-i18n="about-main-commit">Main commit</span>
-          <span class="about-commit-value" data-role="about-main-commit" title="Main commit hash"></span>
-          <span class="about-commit-label" data-i18n="about-ebpf-commit">eBPF commit</span>
-          <span class="about-commit-value" data-role="about-ebpf-commit" title="eBPF commit hash"></span>
+    <dialog class="about-dialog" id="about-dialog" aria-label="About Little Snitch for Linux"
+            data-i18n-aria-label="about-btn-label">
+        <div class="about-dialog-content">
+            <button class="about-close-button" type="button" aria-label="Close">×</button>
+            <img class="about-icon" src="littlesnitch-192.png" alt="Little Snitch for Linux icon" width="96" height="96"
+                 data-i18n-alt="about-icon-alt"/>
+            <h1 class="about-name" data-i18n="app-title">Little Snitch for Linux</h1>
+            <div class="about-version" data-role="about-version"></div>
+            <div class="about-update-info" data-role="about-update-info"></div>
+            <div class="about-commits">
+                <span class="about-commit-label" data-i18n="about-main-commit">Main commit</span>
+                <span class="about-commit-value" data-role="about-main-commit" title="Main commit hash"></span>
+                <span class="about-commit-label" data-i18n="about-ebpf-commit">eBPF commit</span>
+                <span class="about-commit-value" data-role="about-ebpf-commit" title="eBPF commit hash"></span>
+            </div>
+            <div class="about-copyright" data-role="about-copyright"></div>
+            <a class="about-website" data-role="about-website" target="_blank" rel="noopener noreferrer" hidden></a>
+            <!-- Space reserved for future credits section -->
+            <section class="about-credits" hidden></section>
         </div>
-        <div class="about-copyright" data-role="about-copyright"></div>
-        <a class="about-website" data-role="about-website" target="_blank" rel="noopener noreferrer" hidden></a>
-        <!-- Space reserved for future credits section -->
-        <section class="about-credits" hidden></section>
-      </div>
     </dialog>
 
     <main>
-      <section class="section is-active" data-section="connections">
-        <div class="section-topbar">
-          <div class="control-group">
-            <div class="search-wrap">
-              <svg width="18" height="18" fill="currentColor" opacity="0.33"><use href="#search-loupe" /></svg>
-              <input class="search-input" type="search" placeholder="Filter connections..." data-role="search"
-                data-section="connections" data-i18n-placeholder="search-connections-placeholder" />
-              <button class="search-clear-button" type="button" data-role="search-clear" aria-label="Clear search">
-                <svg width="18" height="18" fill="currentColor"><use href="#btn-search-clear" /></svg>
-              </button>
-            </div>
-            <div class="filter-control" data-role="filter-control">
-              <button class="filter-btn" type="button" data-role="filter-toggle" aria-haspopup="true" aria-expanded="false">
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                  <line x1="4" y1="6" x2="20" y2="6"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="11" y1="18" x2="13" y2="18"/>
-                </svg>
-                <span class="filter-chips" data-role="filter-chips"></span>
-                <span class="filter-placeholder" data-role="filter-placeholder" data-i18n="filter-placeholder">Filter</span>
-              </button>
-              <div class="filter-popup" data-role="filter-popup" hidden>
-                <div class="filter-popup-row">
-                  <label class="filter-popup-label" data-i18n="filter-direction-label">Direction</label>
-                  <select class="menu-select" data-role="direction-filter">
-                    <option value="both" data-i18n="filter-dir-any">Any</option>
-                    <option value="out" data-i18n="filter-dir-out">Out only</option>
-                    <option value="in" data-i18n="filter-dir-in">In only</option>
-                  </select>
+        <section class="section is-active" data-section="connections">
+            <div class="section-topbar">
+                <div class="control-group">
+                    <div class="search-wrap">
+                        <svg width="18" height="18" fill="currentColor" opacity="0.33">
+                            <use href="sprite/sprite.svg#search-loupe"/>
+                        </svg>
+                        <input class="search-input" type="search" placeholder="Filter connections..." data-role="search"
+                               data-section="connections" data-i18n-placeholder="search-connections-placeholder"/>
+                        <button class="search-clear-button" type="button" data-role="search-clear"
+                                aria-label="Clear search">
+                            <svg width="18" height="18" fill="currentColor">
+                                <use href="sprite/sprite.svg#btn-search-clear"/>
+                            </svg>
+                        </button>
+                    </div>
+                    <div class="filter-control" data-role="filter-control">
+                        <button class="filter-btn" type="button" data-role="filter-toggle" aria-haspopup="true"
+                                aria-expanded="false">
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                 stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <line x1="4" y1="6" x2="20" y2="6"/>
+                                <line x1="8" y1="12" x2="16" y2="12"/>
+                                <line x1="11" y1="18" x2="13" y2="18"/>
+                            </svg>
+                            <span class="filter-chips" data-role="filter-chips"></span>
+                            <span class="filter-placeholder" data-role="filter-placeholder"
+                                  data-i18n="filter-placeholder">Filter</span>
+                        </button>
+                        <div class="filter-popup" data-role="filter-popup" hidden>
+                            <div class="filter-popup-row">
+                                <label class="filter-popup-label" data-i18n="filter-direction-label">Direction</label>
+                                <select class="menu-select" data-role="direction-filter">
+                                    <option value="both" data-i18n="filter-dir-any">Any</option>
+                                    <option value="out" data-i18n="filter-dir-out">Out only</option>
+                                    <option value="in" data-i18n="filter-dir-in">In only</option>
+                                </select>
+                            </div>
+                            <div class="filter-popup-row">
+                                <label class="filter-popup-label" data-i18n="filter-remote-label">Remote</label>
+                                <select class="menu-select" data-role="location-filter">
+                                    <option value="all" data-i18n="filter-remote-all">Internet + Local Nets</option>
+                                    <option value="internet" data-i18n="filter-remote-internet">Internet only</option>
+                                    <option value="localnet" data-i18n="filter-remote-localnet">Local Nets only</option>
+                                    <option value="localhost" data-i18n="filter-remote-localhost">Local Host only
+                                    </option>
+                                    <option value="everything" data-i18n="filter-remote-everything">Any</option>
+                                </select>
+                            </div>
+                            <div class="filter-popup-row">
+                                <label class="filter-popup-label" data-i18n="filter-action-label">Action</label>
+                                <select class="menu-select" data-role="verdict-filter">
+                                    <option value="any" data-i18n="filter-action-any">Any</option>
+                                    <option value="allow" data-i18n="filter-action-allow">Allowed only</option>
+                                    <option value="deny" data-i18n="filter-action-deny">Denied only</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <select class="menu-select compact" data-role="visible-period-filter" title="Visible time period">
+                        <option value="60" data-i18n="show-1-minute">Show 1 minute</option>
+                        <option value="600" data-i18n="show-10-minutes">Show 10 minutes</option>
+                        <option value="3600" data-i18n="show-1-hour">Show 1 hour</option>
+                        <option value="21600" data-i18n="show-6-hours">Show 6 hours</option>
+                        <option value="86400" data-i18n="show-1-day">Show 1 day</option>
+                        <option value="604800" data-i18n="show-7-days">Show 7 days</option>
+                        <option value="2592000" data-i18n="show-30-days">Show 30 days</option>
+                        <option value="none" data-i18n="show-all">Show all</option>
+                    </select>
+
                 </div>
-                <div class="filter-popup-row">
-                  <label class="filter-popup-label" data-i18n="filter-remote-label">Remote</label>
-                  <select class="menu-select" data-role="location-filter">
-                    <option value="all" data-i18n="filter-remote-all">Internet + Local Nets</option>
-                    <option value="internet" data-i18n="filter-remote-internet">Internet only</option>
-                    <option value="localnet" data-i18n="filter-remote-localnet">Local Nets only</option>
-                    <option value="localhost" data-i18n="filter-remote-localhost">Local Host only</option>
-                    <option value="everything" data-i18n="filter-remote-everything">Any</option>
-                  </select>
+            </div>
+
+            <div class="split-layout" data-section="connections">
+                <div class="pane left-pane" data-role="left-pane">
+                    <div id="connections-header"></div>
+                    <div class="pane-content list-container" data-role="list" id="connections-list"></div>
                 </div>
-                <div class="filter-popup-row">
-                  <label class="filter-popup-label" data-i18n="filter-action-label">Action</label>
-                  <select class="menu-select" data-role="verdict-filter">
-                    <option value="any" data-i18n="filter-action-any">Any</option>
-                    <option value="allow" data-i18n="filter-action-allow">Allowed only</option>
-                    <option value="deny" data-i18n="filter-action-deny">Denied only</option>
-                  </select>
+                <div class="splitter" data-role="splitter" aria-hidden="true"></div>
+                <div class="pane right-pane" data-role="right-pane">
+                    <div class="pane-title" data-i18n="connection-details-header">Connection Details</div>
+                    <div class="pane-content details-container" data-role="details" id="inspector">
+                        <div id="rules"></div>
+                    </div>
                 </div>
-              </div>
             </div>
-            <select class="menu-select compact" data-role="visible-period-filter" title="Visible time period">
-              <option value="60" data-i18n="show-1-minute">Show 1 minute</option>
-              <option value="600" data-i18n="show-10-minutes">Show 10 minutes</option>
-              <option value="3600" data-i18n="show-1-hour">Show 1 hour</option>
-              <option value="21600" data-i18n="show-6-hours">Show 6 hours</option>
-              <option value="86400" data-i18n="show-1-day">Show 1 day</option>
-              <option value="604800" data-i18n="show-7-days">Show 7 days</option>
-              <option value="2592000" data-i18n="show-30-days">Show 30 days</option>
-              <option value="none" data-i18n="show-all">Show all</option>
-            </select>
+            <div class="h-splitter" data-role="h-splitter" aria-hidden="true"></div>
+            <div class="traffic-chart-wrap" id="traffic-chart"></div>
+        </section>
 
-          </div>
-        </div>
-
-        <div class="split-layout" data-section="connections">
-          <div class="pane left-pane" data-role="left-pane">
-            <div id="connections-header"></div>
-            <div class="pane-content list-container" data-role="list" id="connections-list"></div>
-          </div>
-          <div class="splitter" data-role="splitter" aria-hidden="true"></div>
-          <div class="pane right-pane" data-role="right-pane">
-            <div class="pane-title" data-i18n="connection-details-header">Connection Details</div>
-            <div class="pane-content details-container" data-role="details" id="inspector">
-              <div id="rules"></div>
+        <section class="section" data-section="blocklists">
+            <div class="section-topbar">
+                <div class="control-group">
+                    <div class="search-wrap">
+                        <svg width="18" height="18" fill="currentColor" opacity="0.33">
+                            <use href="sprite/sprite.svg#search-loupe"/>
+                        </svg>
+                        <input class="search-input" type="search" placeholder="Filter selected blocklist..."
+                               data-role="search"
+                               data-section="blocklists" data-i18n-placeholder="search-blocklists-placeholder"/>
+                        <button class="search-clear-button" type="button" data-role="search-clear"
+                                aria-label="Clear search">
+                            <svg width="18" height="18" fill="currentColor">
+                                <use href="sprite/sprite.svg#btn-search-clear"/>
+                            </svg>
+                        </button>
+                    </div>
+                    <label class="checkbox-label">
+                        <input type="checkbox" data-role="blocklist-disabled-only"/><span
+                            data-i18n="show-only-disabled">Show only disabled entries</span>
+                    </label>
+                </div>
             </div>
-          </div>
-        </div>
-        <div class="h-splitter" data-role="h-splitter" aria-hidden="true"></div>
-        <div class="traffic-chart-wrap" id="traffic-chart"></div>
-      </section>
 
-      <section class="section" data-section="blocklists">
-        <div class="section-topbar">
-          <div class="control-group">
-            <div class="search-wrap">
-              <svg width="18" height="18" fill="currentColor" opacity="0.33"><use href="#search-loupe" /></svg>
-              <input class="search-input" type="search" placeholder="Filter selected blocklist..." data-role="search"
-                data-section="blocklists" data-i18n-placeholder="search-blocklists-placeholder" />
-              <button class="search-clear-button" type="button" data-role="search-clear" aria-label="Clear search">
-                <svg width="18" height="18" fill="currentColor"><use href="#btn-search-clear" /></svg>
-              </button>
+            <div class="split-layout" data-section="blocklists">
+                <div class="pane left-pane" data-role="left-pane">
+                    <div class="pane-title" data-i18n="blocklists-header">Blocklists</div>
+                    <div class="pane-content list-container" data-role="list" id="blocklists"></div>
+                </div>
+                <div class="splitter" data-role="splitter" aria-hidden="true"></div>
+                <div class="pane right-pane" data-role="right-pane">
+                    <div class="pane-title" data-i18n="blocklist-details-header">Blocklist Details</div>
+                    <div class="pane-content details-container" data-role="details"></div>
+                </div>
             </div>
-            <label class="checkbox-label">
-              <input type="checkbox" data-role="blocklist-disabled-only" /><span data-i18n="show-only-disabled">Show only disabled entries</span>
-            </label>
-          </div>
-        </div>
+        </section>
 
-        <div class="split-layout" data-section="blocklists">
-          <div class="pane left-pane" data-role="left-pane">
-            <div class="pane-title" data-i18n="blocklists-header">Blocklists</div>
-            <div class="pane-content list-container" data-role="list" id="blocklists"></div>
-          </div>
-          <div class="splitter" data-role="splitter" aria-hidden="true"></div>
-          <div class="pane right-pane" data-role="right-pane">
-            <div class="pane-title" data-i18n="blocklist-details-header">Blocklist Details</div>
-            <div class="pane-content details-container" data-role="details"></div>
-          </div>
-        </div>
-      </section>
-
-      <section class="section" data-section="rules">
-        <div class="section-topbar">
-          <div class="control-group">
-            <div class="search-wrap">
-              <svg width="18" height="18" fill="currentColor" opacity="0.33"><use href="#search-loupe" /></svg>
-              <input class="search-input" type="search" placeholder="Filter rules..." data-role="search"
-                data-section="rules" data-i18n-placeholder="search-rules-placeholder" />
-              <button class="search-clear-button" type="button" data-role="search-clear" aria-label="Clear search">
-                <svg width="18" height="18" fill="currentColor"><use href="#btn-search-clear" /></svg>
-              </button>
+        <section class="section" data-section="rules">
+            <div class="section-topbar">
+                <div class="control-group">
+                    <div class="search-wrap">
+                        <svg width="18" height="18" fill="currentColor" opacity="0.33">
+                            <use href="sprite/sprite.svg#search-loupe"/>
+                        </svg>
+                        <input class="search-input" type="search" placeholder="Filter rules..." data-role="search"
+                               data-section="rules" data-i18n-placeholder="search-rules-placeholder"/>
+                        <button class="search-clear-button" type="button" data-role="search-clear"
+                                aria-label="Clear search">
+                            <svg width="18" height="18" fill="currentColor">
+                                <use href="sprite/sprite.svg#btn-search-clear"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
             </div>
-          </div>
-        </div>
 
-        <div class="split-layout" data-section="rules">
-          <div class="pane left-pane" data-role="left-pane">
-            <div class="pane-content list-container" data-role="list" id="rules-list"></div>
-          </div>
-          <div class="splitter" data-role="splitter" aria-hidden="true"></div>
-          <div class="pane right-pane" data-role="right-pane">
-            <div class="pane-title" data-i18n="rule-details-header">Rule Details</div>
-            <div class="pane-content details-container" data-role="details" id="rules-details"></div>
-          </div>
-        </div>
-      </section>
+            <div class="split-layout" data-section="rules">
+                <div class="pane left-pane" data-role="left-pane">
+                    <div class="pane-content list-container" data-role="list" id="rules-list"></div>
+                </div>
+                <div class="splitter" data-role="splitter" aria-hidden="true"></div>
+                <div class="pane right-pane" data-role="right-pane">
+                    <div class="pane-title" data-i18n="rule-details-header">Rule Details</div>
+                    <div class="pane-content details-container" data-role="details" id="rules-details"></div>
+                </div>
+            </div>
+        </section>
     </main>
-  </div>
+</div>
 
-  <script src="uPlot.iife.min.js"></script>
-  <script src="localization.js"></script>
-  <script src="datetime.js"></script>
-  <script src="traffic.js"></script>
-  <script src="selection.js"></script>
-  <script src="connections.js"></script>
-  <script src="blocklists.js"></script>
-  <script src="rules.js"></script>
-  <script src="app.js"></script>
+<script src="js/footer-app.min.js" defer></script>
+
 </body>
 
 </html>

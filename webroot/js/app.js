@@ -81,7 +81,7 @@
         console.log("WebSocket closed by logout, reloading page");
         const placeholder = document.createElement("div");
         placeholder.className = "logout-placeholder";
-        placeholder.textContent = t("signed-out");
+        placeholder.textContent = window._localization.t("signed-out");
         document.body.replaceChildren(placeholder);
         window.location.reload();
         return;
@@ -231,7 +231,7 @@
     const themeToggle = document.querySelector('button.theme-toggle');
     if (themeToggle != null) {
       const themeName = value ?? "automatic";
-      themeToggle.innerHTML = `<svg width=\"18\" height=\"18\" fill=\"currentColor\"><use href=\"#theme-${themeName}\"/></svg>`;
+      themeToggle.innerHTML = `<svg width=\"18\" height=\"18\" fill=\"currentColor\"><use href="sprite/sprite.svg#theme-${themeName}\" href=\"sprite/sprite.svg#theme-${themeName}\"/></svg>`;
     }
     document.querySelectorAll('[data-role="theme-option"]').forEach((item) => {
       item.classList.toggle("is-selected", item.dataset.value === (value ?? ""));
@@ -574,7 +574,7 @@
         if (tempValues.includes(loc) && !locationInput.querySelector(`option[value="${loc}"]`)) {
           const opt = document.createElement("option");
           opt.value = loc;
-          opt.textContent = t(loc === 'internet-and-localhost' ? 'location-internet-and-local-host' : 'location-invalid');
+          opt.textContent = window._localization.t(loc === 'internet-and-localhost' ? 'location-internet-and-local-host' : 'location-invalid');
           opt.dataset.temp = "1";
           locationInput.appendChild(opt);
         }
@@ -791,7 +791,7 @@
         el.textContent = text;
       }
     };
-    set("about-version", t('about-version', { version: msg.version }));
+    set("about-version", window._localization.t('about-version', { version: msg.version }));
     set("about-main-commit", msg.mainCommit);
     set("about-ebpf-commit", msg.ebpfCommit);
     set("about-copyright", msg.copyright);
@@ -820,7 +820,7 @@
     const latestVersion = msg.status?.latestVersion ?? '';
     const textEl = banner.querySelector('[data-role="update-banner-text"]');
     if (textEl) {
-      textEl.textContent = t('update-available', { latestVersion, currentVersion: msg.currentVersion });
+      textEl.textContent = window._localization.t('update-available', { latestVersion, currentVersion: msg.currentVersion });
     }
     const downloadBtn = banner.querySelector('[data-role="update-download-btn"]');
     if (downloadBtn instanceof HTMLAnchorElement) {
@@ -862,14 +862,14 @@
       const btn = document.createElement('button');
       btn.type = 'button';
       btn.className = 'about-check-now-btn';
-      btn.textContent = t('about-check-now');
+      btn.textContent = window._localization.t('about-check-now');
       btn.onclick = () => sendAction('checkForUpdate');
       container.appendChild(btn);
     };
 
     if (msg.isNewer && msg.status?.latestVersion) {
       const div = document.createElement('div');
-      const text = t('about-update-newer', { version: msg.status.latestVersion });
+      const text = window._localization.t('about-update-newer', { version: msg.status.latestVersion });
       if (msg.downloadUrl) {
         const a = document.createElement('a');
         a.href = msg.downloadUrl;
@@ -885,18 +885,18 @@
     }
 
     if (msg.status?.lastError) {
-      addLine(t('about-update-error', { error: msg.status.lastError }));
+      addLine(window._localization.t('about-update-error', { error: msg.status.lastError }));
       if (msg.status.lastFailedCheck) {
-        addLine(t('about-last-checked', { time: formatDateTime(msg.status.lastFailedCheck / 1e9, false) }));
+        addLine(window._localization.t('about-last-checked', { time: formatDateTime(msg.status.lastFailedCheck / 1e9, false) }));
       }
       if (msg.status.lastSuccessfulCheck) {
-        addLine(t('about-last-successful', { time: formatDateTime(msg.status.lastSuccessfulCheck / 1e9, false) }));
+        addLine(window._localization.t('about-last-successful', { time: formatDateTime(msg.status.lastSuccessfulCheck / 1e9, false) }));
       }
       addCheckNowBtn();
     } else if (!msg.isNewer) {
-      addLine(t('about-up-to-date'));
+      addLine(window._localization.t('about-up-to-date'));
       if (msg.status?.lastSuccessfulCheck) {
-        addLine(t('about-last-checked', { time: formatDateTime(msg.status.lastSuccessfulCheck / 1e9, false) }));
+        addLine(window._localization.t('about-last-checked', { time: formatDateTime(msg.status.lastSuccessfulCheck / 1e9, false) }));
       }
       addCheckNowBtn();
     }
@@ -1035,7 +1035,7 @@
     }
     const label = document.querySelector('[data-role="filter-switch"] .filter-switch-label');
     if (label) {
-      label.textContent = filterDisabled ? t('filter-disabled') : t('filter-enabled');
+      label.textContent = filterDisabled ? window._localization.t('filter-disabled') : window._localization.t('filter-enabled');
     }
   }
 
@@ -1057,7 +1057,7 @@
   function refreshLogoutLabel() {
     const item = document.querySelector('[data-role="logout-item"]');
     if (item && state.loginUsername) {
-      item.textContent = t('btn-logout', { username: state.loginUsername });
+      item.textContent = window._localization.t('btn-logout', { username: state.loginUsername });
     }
   }
 
@@ -1290,5 +1290,5 @@
 })();
 
 if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('/sw.js');
+  navigator.serviceWorker.register('/js/sw.js');
 }

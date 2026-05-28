@@ -286,7 +286,7 @@
         {
           scale: "blocks",
           side: 1,
-          label: t('traffic-blocked'),
+          label: window._localization.t('traffic-blocked'),
           labelSize: 14,
           values: (_self, ticks) => ticks.map(v => v > 0 ? v.toFixed(0) : "0"),
           size: 50,
@@ -300,7 +300,7 @@
           value: (_self, v) => v == null ? "--" : formatDateTime(v, false, { hour12: false }),
         },
         {
-          label: t('traffic-total'),
+          label: window._localization.t('traffic-total'),
           scale: "y",
           stroke: totalStroke,
           fill: totalFill,
@@ -309,7 +309,7 @@
           show: false,
         },
         {
-          label: t('traffic-received'),
+          label: window._localization.t('traffic-received'),
           scale: "y",
           stroke: rxStroke,
           fill: rxFill,
@@ -317,7 +317,7 @@
           ...bytesSeries,
         },
         {
-          label: t('traffic-sent'),
+          label: window._localization.t('traffic-sent'),
           scale: "y",
           stroke: txStroke,
           fill: txFill,
@@ -325,7 +325,7 @@
           ...bytesSeries,
         },
         {
-          label: t('traffic-blocked'),
+          label: window._localization.t('traffic-blocked'),
           scale: "blocks",
           stroke: blockedStroke,
           fill: blockedFill,
@@ -420,11 +420,11 @@
     const optTotal = document.createElement("option");
     optTotal.value = "total";
     optTotal.dataset.i18n = "traffic-mode-total";
-    optTotal.textContent = t("traffic-mode-total");
+    optTotal.textContent = window._localization.t("traffic-mode-total");
     const optRate = document.createElement("option");
     optRate.value = "rate";
     optRate.dataset.i18n = "traffic-mode-rate";
-    optRate.textContent = t("traffic-mode-rate");
+    optRate.textContent = window._localization.t("traffic-mode-rate");
     sel.append(optTotal, optRate);
     sel.value = displayMode;
     sel.addEventListener("change", () => {
@@ -443,11 +443,11 @@
     badge.type = "button";
     badge.className = "traffic-filter-badge";
     badge.hidden = true;
-    badge.setAttribute("aria-label", t("remove-time-filter"));
+    badge.setAttribute("aria-label", window._localization.t("remove-time-filter"));
     badge.dataset.i18nAriaLabel = "remove-time-filter";
     const badgeText = document.createElement("span");
     badgeText.dataset.i18n = "time-filter";
-    badgeText.textContent = t("time-filter");
+    badgeText.textContent = window._localization.t("time-filter");
     const badgeX = document.createElement("span");
     badgeX.setAttribute("aria-hidden", "true");
     badgeX.textContent = "\u00d7";
@@ -466,11 +466,11 @@
       replacement.type = "button";
       replacement.className = "filter-btn is-active time-filter-indicator";
       replacement.hidden = true;
-      replacement.setAttribute("aria-label", t("remove-time-filter"));
+      replacement.setAttribute("aria-label", window._localization.t("remove-time-filter"));
       replacement.dataset.i18nAriaLabel = "remove-time-filter";
       const replText = document.createElement("span");
       replText.dataset.i18n = "time-filter";
-      replText.textContent = t("time-filter");
+      replText.textContent = window._localization.t("time-filter");
       const replX = document.createElement("span");
       replX.setAttribute("aria-hidden", "true");
       replX.textContent = "\u00d7";

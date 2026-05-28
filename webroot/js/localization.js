@@ -356,19 +356,19 @@ function applyLocalizationToDOM() {
   document.querySelectorAll('[data-i18n]:not([data-i18n="app-title"])').forEach(el => {
     for (const node of el.childNodes) {
       if (node.nodeType === Node.TEXT_NODE && node.textContent.trim() !== '') {
-        node.textContent = t(el.dataset.i18n);
+        node.textContent = window._localization.t(el.dataset.i18n);
         return; // replace only the first text node found
       }
     }
   });
   document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
-    el.placeholder = t(el.dataset.i18nPlaceholder);
+    el.placeholder = window._localization.t(el.dataset.i18nPlaceholder);
   });
   document.querySelectorAll('[data-i18n-aria-label]').forEach(el => {
     el.setAttribute('aria-label', t(el.dataset.i18nAriaLabel));
   });
   document.querySelectorAll('[data-i18n-alt]').forEach(el => {
-    el.alt = t(el.dataset.i18nAlt);
+    el.alt = window._localization.t(el.dataset.i18nAlt);
   });
   // Column widths as CSS custom properties
   const root = document.documentElement;
@@ -377,13 +377,18 @@ function applyLocalizationToDOM() {
     'col-action-w', 'col-dir-w', 'col-port-w',       // rules table
   ].forEach(key => root.style.setProperty('--' + key, t(key)));
 
-  const appTitle = 'Little Snitch' + t('brand-connector') + 'Linux';
+  const appTitle = 'Little Snitch' + window._localization.t('brand-connector') + 'Linux';
   const titleEl = document.querySelector('title');
   if (titleEl) titleEl.textContent = appTitle;
   document.querySelectorAll('[data-i18n="app-title"]').forEach(el => {
     el.textContent = appTitle;
   });
 }
+
+window._localization = {
+    t: t,
+    strings: _strings
+};
 
 // Apply English defaults as soon as the script loads (scripts run after <body>
 // content, so the DOM is already present).
