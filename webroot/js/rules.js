@@ -224,8 +224,8 @@ function shortDateTime(epochSeconds) {
   if (!epochSeconds || epochSeconds <= 0) return '';
   const age = Date.now() / 1000 - epochSeconds;
   const d = new Date(epochSeconds * 1000);
-  const prefs = getDtPrefs();
-  return age < 86400 ? _fmtTime(d, prefs, false) : _fmtDate(d, prefs);
+  const prefs = window.getDtPrefs();
+  return age < 86400 ? window._fmtTime(d, prefs, false) : window._fmtDate(d, prefs);
 }
 
 function fixedSortOrderForKey(key) {
@@ -318,7 +318,7 @@ function setHighlightedText(element, text) {
   element.textContent = '';
   element.appendChild(fragment);
 }
-
+window.setHighlightedText = setHighlightedText;
 function revealRuleInList(ruleId) {
   const container = document.getElementById('rules-list');
   if (!container) {
@@ -435,7 +435,7 @@ function ruleLifetimeLabel(lifetime) {
   if (lifetime && typeof lifetime === 'object') {
     const until = lifetime.until ?? lifetime.Until;
     if (typeof until === 'number') {
-      return window._localization.t('lifetime-until', { datetime: formatDateTime(until) });
+      return window._localization.t('lifetime-until', { datetime: window.formatDateTime(until) });
     }
   }
   return window._localization.t('lifetime-forever');
@@ -445,7 +445,7 @@ function ruleTimeLabel(epochSeconds) {
   if (!epochSeconds || epochSeconds <= 0) {
     return '-';
   }
-  return formatDateTime(epochSeconds);
+  return window.formatDateTime(epochSeconds);
 }
 
 function appendInspectorRow(grid, key, value, opts = {}) {
@@ -472,6 +472,7 @@ function appendInspectorRow(grid, key, value, opts = {}) {
 
   grid.appendChild(row);
 }
+window.appendInspectorRow = appendInspectorRow;
 
 function appendInspectorBox(container, headline, content) {
   const block = document.createElement('div');
@@ -1141,7 +1142,8 @@ function renderRuleTable(ruleList) {
     const directionCell = document.createElement('td');
     const directionInner = document.createElement('div');
     directionInner.className = 'rule-cell-inner';
-    setHighlightedText(directionInner, `${ruleDirectionArrow(rule.direction)} ${ruleDirectionLabel(rule.direction)}`);
+    directionInner.innerHTML = `${ruleDirectionArrow(rule.direction)} <span>${escapeHtml(ruleDirectionLabel(rule.direction))}</span>`;
+
     directionCell.setAttribute('data-role', 'rule-direction');
     directionCell.title = ruleDirectionLabel(rule.direction);
     directionCell.appendChild(directionInner);
@@ -1162,10 +1164,10 @@ function renderRuleTable(ruleList) {
     const protocolPort = ruleProtocolPortLabel(rule.protocol, rule.port);
     if (rulesLastColumnSort === 'modificationDate') {
       protocolPortInner.textContent = shortDateTime(rule.modificationDate);
-      protocolPortCell.title = formatDateTime(rule.modificationDate);
+      protocolPortCell.title = window.formatDateTime(rule.modificationDate);
     } else if (rulesLastColumnSort === 'creationDate') {
       protocolPortInner.textContent = shortDateTime(rule.creationDate);
-      protocolPortCell.title = formatDateTime(rule.creationDate);
+      protocolPortCell.title = window.formatDateTime(rule.creationDate);
     } else if (rulesLastColumnSort === 'precedence') {
       protocolPortInner.textContent = String((rulesOriginalOrder.get(rule.id) ?? 0) + 1);
     } else if (rulesLastColumnSort === 'priority') {

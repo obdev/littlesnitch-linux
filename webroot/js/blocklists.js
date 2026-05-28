@@ -793,7 +793,7 @@ function formatEntryTitle(entry) {
 }
 
 function formatLocalTime(secondsSinceEpoch) {
-  return formatDateTime(Number(secondsSinceEpoch));
+  return window.formatDateTime(Number(secondsSinceEpoch));
 }
 
 function normalizeUpdatePeriodMinutes(value) {
@@ -1103,7 +1103,7 @@ function renderEntryRow(entry, index) {
   title.appendChild(valueSpan);
 
   if (Array.isArray(entry.blocklists) && entry.blocklists.length > 0) {
-    appendBlocklistNamesInfo(title, entry.blocklists.map(id => blocklistsById.get(id)?.name).filter(Boolean));
+    window.appendBlocklistNamesInfo(title, entry.blocklists.map(id => blocklistsById.get(id)?.name).filter(Boolean));
   }
 
   row.appendChild(title);
@@ -1267,7 +1267,7 @@ function renderBlocklistPropertiesCard(blocklist) {
   if (blocklist.description && blocklist.description.trim().length > 0) {
     const descBox = document.createElement('div');
     descBox.className = 'inspector-box';
-    setHighlightedText(descBox, blocklist.description);
+    window.setHighlightedText(descBox, blocklist.description);
     card.appendChild(descBox);
   }
 

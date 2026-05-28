@@ -14,6 +14,7 @@
     "sass": "^1.100.0",
     "sass-loader": "^17.0.0",
     "svgstore": "^3.0.1",
+    "uplot": "^1.6.32",
     "webpack": "^5.107.2",
     "webpack-remove-empty-scripts": "^1.1.1"
   }

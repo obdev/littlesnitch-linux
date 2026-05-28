@@ -50,6 +50,7 @@ function ageString(epochSeconds) {
   if (age < 5184000) return window._localization.t('age-days',   { n: Math.max(3, Math.floor(age / 86400)) });
   return window._localization.t('age-months', { n: Math.max(3, Math.floor(age / 2592000)) });
 }
+window.ageString = ageString;
 
 // Absolute event time, format depends on how long ago the event was:
 //   < 24 h  → HH:MM:SS
@@ -60,20 +61,20 @@ function absoluteTimeString(epochSeconds) {
   if (!epochSeconds || epochSeconds <= 0) return '';
   const age = Date.now() / 1000 - epochSeconds;
   const d = new Date(epochSeconds * 1000);
-  const prefs = getDtPrefs();
+  const prefs = window.getDtPrefs();
   if (age < 86400) {
-    return _fmtTime(d, prefs, true);
+    return window._fmtTime(d, prefs, true);
   }
   if (age < 604800) {
     const day = d.toLocaleDateString(undefined, { weekday: 'short' });
-    return `${day} ${_fmtTime(d, prefs, false)}`;
+    return `${day} ${window._fmtTime(d, prefs, false)}`;
   }
-  return _fmtDate(d, prefs);
+  return window._fmtDate(d, prefs);
 }
 
 // Full date+time in local time — used in the inspector panel.
 function fullDateTimeString(epochSeconds) {
-  return formatDateTime(epochSeconds);
+  return window.formatDateTime(epochSeconds);
 }
 
 
@@ -408,6 +409,7 @@ function appendBlocklistNamesInfo(container, names) {
     container.appendChild(ul);
   }
 }
+window.appendBlocklistNamesInfo = appendBlocklistNamesInfo;
 
 /**
  * Turn a single blocklist object into a <div class="block"> element.
@@ -777,6 +779,7 @@ function renderLastEventSpans() {
     span.textContent = text;
   }
 }
+window.renderLastEventSpans = renderLastEventSpans;
 
 // Refresh every 10 s — keeps age buckets current and also catches format
 // boundary crossings while Alt is held (e.g. event crossing the 24 h mark).

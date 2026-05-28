@@ -39,6 +39,7 @@ function getDtPrefs() {
     // dateSep intentionally absent: _fmtDate uses Intl directly.
   };
 }
+window.getDtPrefs = getDtPrefs;
 
 // ---------------------------------------------------------------------------
 // Low-level helpers (also used directly by absoluteTimeString in
@@ -48,6 +49,7 @@ function getDtPrefs() {
 function _pad(n) {
   return String(n).padStart(2, '0');
 }
+window._pad = _pad;
 
 // Detect the locale's date component order from Intl and map it to the
 // conventional separator for that order:
@@ -74,6 +76,7 @@ function _getLocaleDateFmt() {
   if (parts[0] === '03')   return { order: 'MDY', sep: '/' };
   return { order: 'YMD', sep: '-' }; // safe fallback
 }
+window._getLocaleDateFmt = _getLocaleDateFmt;
 
 // Format just the date portion of d.
 // Uses locale-detected component order + conventional separator unless
@@ -92,6 +95,7 @@ function _fmtDate(d, prefs) {
   if (order === 'MDY') return `${m}${sep}${day}${sep}${y}`;
   return `${y}${sep}${m}${sep}${day}`;
 }
+window._fmtDate = _fmtDate;
 
 // Format just the time portion of d according to prefs.
 // Time parts are always separated by colons, never dots.
@@ -103,6 +107,7 @@ function _fmtTime(d, prefs, showSecs) {
   const t = showSecs ? `${base}:${_pad(d.getSeconds())}` : base;
   return prefs.hour12 ? `${t} ${d.getHours() < 12 ? 'am' : 'pm'}` : t;
 }
+window._fmtTime = _fmtTime;
 
 // ---------------------------------------------------------------------------
 // Primary export
@@ -120,3 +125,4 @@ function formatDateTime(epochSeconds, showSeconds = true, prefsOverride = null) 
   const d = new Date(epochSeconds * 1000);
   return `${_fmtDate(d, prefs)} ${_fmtTime(d, prefs, showSeconds)}`;
 }
+window.formatDateTime = formatDateTime;
