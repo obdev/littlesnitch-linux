@@ -759,7 +759,7 @@ function ensureRuleDialog() {
   actionLabel.textContent = window._localization.t('dlg-action-label');
   const actionSelect = document.createElement('select');
   actionSelect.className = 'edit-dialog-input';
-  actionSelect.innerHTML = `<option value="allow">${t('action-allow')}</option><option value="deny">${t('action-deny')}</option>`;
+  actionSelect.innerHTML = `<option value="allow">${window._localization.t('action-allow')}</option><option value="deny">${window._localization.t('action-deny')}</option>`;
   actionLabel.appendChild(actionSelect);
   actionDirectionRow.appendChild(actionLabel);
 
@@ -768,7 +768,7 @@ function ensureRuleDialog() {
   directionLabel.textContent = window._localization.t('dlg-direction-label');
   const directionSelect = document.createElement('select');
   directionSelect.className = 'edit-dialog-input';
-  directionSelect.innerHTML = `<option value="1">${t('dir-out')}</option><option value="2">${t('dir-in')}</option><option value="3">${t('dir-both')}</option>`;
+  directionSelect.innerHTML = `<option value="1">${window._localization.t('dir-out')}</option><option value="2">${window._localization.t('dir-in')}</option><option value="3">${window._localization.t('dir-both')}</option>`;
   directionLabel.appendChild(directionSelect);
   actionDirectionRow.appendChild(directionLabel);
   form.appendChild(actionDirectionRow);
@@ -779,11 +779,11 @@ function ensureRuleDialog() {
   const remoteTypeSelect = document.createElement('select');
   remoteTypeSelect.className = 'edit-dialog-input';
   remoteTypeSelect.innerHTML = [
-    `<option value="1">${t('any-server')}</option>`,
-    `<option value="2">${t('remote-local-network')}</option>`,
-    `<option value="3">${t('remote-hosts')}</option>`,
-    `<option value="4">${t('remote-domains')}</option>`,
-    `<option value="5">${t('remote-ip-addresses')}</option>`,
+    `<option value="1">${window._localization.t('any-server')}</option>`,
+    `<option value="2">${window._localization.t('remote-local-network')}</option>`,
+    `<option value="3">${window._localization.t('remote-hosts')}</option>`,
+    `<option value="4">${window._localization.t('remote-domains')}</option>`,
+    `<option value="5">${window._localization.t('remote-ip-addresses')}</option>`,
   ].join('');
   remoteTypeLabel.appendChild(remoteTypeSelect);
   form.appendChild(remoteTypeLabel);
@@ -811,7 +811,7 @@ function ensureRuleDialog() {
   const protocolSelect = document.createElement('select');
   protocolSelect.className = 'edit-dialog-input';
   protocolSelect.innerHTML = [
-    `<option value="31">${t('proto-any-option')}</option>`,
+    `<option value="31">${window._localization.t('proto-any-option')}</option>`,
     '<option value="2">TCP</option>',
     '<option value="4">UDP</option>',
     '<option value="1">ICMP</option>',
