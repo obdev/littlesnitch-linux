@@ -43,13 +43,14 @@ function byteCountString(bytes) {
 function ageString(epochSeconds) {
   if (!epochSeconds || epochSeconds <= 0) return '';
   const age = Math.floor(Date.now() / 1000) - epochSeconds;
-  if (age < 10) return t('age-now');
-  if (age < 100) return t('age-seconds', { n: Math.floor(age / 10) * 10 });
-  if (age < 5400) return t('age-minutes', { n: Math.max(2, Math.floor(age / 60)) });
-  if (age < 172800) return t('age-hours',   { n: Math.max(2, Math.floor(age / 3600)) });
-  if (age < 5184000) return t('age-days',   { n: Math.max(3, Math.floor(age / 86400)) });
-  return t('age-months', { n: Math.max(3, Math.floor(age / 2592000)) });
+  if (age < 10) return window._localization.t('age-now');
+  if (age < 100) return window._localization.t('age-seconds', { n: Math.floor(age / 10) * 10 });
+  if (age < 5400) return window._localization.t('age-minutes', { n: Math.max(2, Math.floor(age / 60)) });
+  if (age < 172800) return window._localization.t('age-hours',   { n: Math.max(2, Math.floor(age / 3600)) });
+  if (age < 5184000) return window._localization.t('age-days',   { n: Math.max(3, Math.floor(age / 86400)) });
+  return window._localization.t('age-months', { n: Math.max(3, Math.floor(age / 2592000)) });
 }
+window.ageString = ageString;
 
 // Absolute event time, format depends on how long ago the event was:
 //   < 24 h  → HH:MM:SS
@@ -60,20 +61,20 @@ function absoluteTimeString(epochSeconds) {
   if (!epochSeconds || epochSeconds <= 0) return '';
   const age = Date.now() / 1000 - epochSeconds;
   const d = new Date(epochSeconds * 1000);
-  const prefs = getDtPrefs();
+  const prefs = window.getDtPrefs();
   if (age < 86400) {
-    return _fmtTime(d, prefs, true);
+    return window._fmtTime(d, prefs, true);
   }
   if (age < 604800) {
     const day = d.toLocaleDateString(undefined, { weekday: 'short' });
-    return `${day} ${_fmtTime(d, prefs, false)}`;
+    return `${day} ${window._fmtTime(d, prefs, false)}`;
   }
-  return _fmtDate(d, prefs);
+  return window._fmtDate(d, prefs);
 }
 
 // Full date+time in local time — used in the inspector panel.
 function fullDateTimeString(epochSeconds) {
-  return formatDateTime(epochSeconds);
+  return window.formatDateTime(epochSeconds);
 }
 
 
@@ -285,13 +286,13 @@ function renderRule(rule, withEnableButton) {
     checkbox.type = 'checkbox';
     checkbox.className = 'rule-enable-checkbox';
     checkbox.checked = !rule.isDisabled;
-    checkbox.title = rule.isDisabled ? t('disabled') : t('enabled');
+    checkbox.title = rule.isDisabled ? window._localization.t('disabled') : window._localization.t('enabled');
     checkbox.addEventListener('click', (event) => {
       event.stopPropagation();
     });
     checkbox.addEventListener('change', e => {
       if (rule.id < 0 && !rule.isDisabled) {
-        const confirmed = confirm(t('confirm-disable-factory-rule'));
+        const confirmed = confirm(window._localization.t('confirm-disable-factory-rule'));
         if (!confirmed) { checkbox.checked = true; return; }
       }
       window.app.sendAction('setRuleDisabled', { ruleId: rule.id, isDisabled: !rule.isDisabled });
@@ -315,7 +316,7 @@ function renderRule(rule, withEnableButton) {
   } else if (mainName) {
     proc.textContent = mainName;
   } else {
-    proc.textContent = t('any-process');
+    proc.textContent = window._localization.t('any-process');
   }
   if (proc.textContent) container.appendChild(proc);
 
@@ -332,13 +333,13 @@ function renderRule(rule, withEnableButton) {
   if (remotePattern) {
     switch (remotePattern.type) {
       case 'any':
-        remote.textContent = t('remote-any');
+        remote.textContent = window._localization.t('remote-any');
         break;
       case 'localNet':
-        remote.textContent = t('remote-local-network');
+        remote.textContent = window._localization.t('remote-local-network');
         break;
       case 'domains':
-        remote.textContent = t('remote-domain', { value: remotePattern.value });
+        remote.textContent = window._localization.t('remote-domain', { value: remotePattern.value });
         break;
       case 'hosts':
       case 'ipAddresses':
@@ -361,7 +362,7 @@ function renderRule(rule, withEnableButton) {
 
   if (typeof rule.id === 'number') {
     container.classList.add('rule-link');
-    container.title = t('show-in-rules');
+    container.title = window._localization.t('show-in-rules');
     container.addEventListener('click', () => {
       const rulesTab = document.querySelector('.tab[data-section="rules"]');
       if (rulesTab instanceof HTMLButtonElement) {
@@ -399,7 +400,7 @@ function appendBlocklistNamesInfo(container, names) {
     });
     const counterSpan = document.createElement('span');
     counterSpan.className = 'list-info';
-    counterSpan.textContent = t('n-blocklists', { n: names.length });
+    counterSpan.textContent = window._localization.t('n-blocklists', { n: names.length });
     counterSpan.title = names.join(', ');
     counterSpan.addEventListener('click', () => {
       ul.style.display = ul.style.display === 'none' ? 'block' : 'none';
@@ -408,6 +409,7 @@ function appendBlocklistNamesInfo(container, names) {
     container.appendChild(ul);
   }
 }
+window.appendBlocklistNamesInfo = appendBlocklistNamesInfo;
 
 /**
  * Turn a single blocklist object into a <div class="block"> element.
@@ -424,7 +426,7 @@ function renderBlocklistEntry(entry, withEnableButton) {
     checkbox.type = 'checkbox';
     checkbox.className = 'rule-enable-checkbox';
     checkbox.checked = !entry.isDisabled;
-    checkbox.title = entry.isDisabled ? t('disabled') : t('enabled');
+    checkbox.title = entry.isDisabled ? window._localization.t('disabled') : window._localization.t('enabled');
     checkbox.addEventListener('click', (event) => {
       event.stopPropagation();
     });
@@ -458,7 +460,7 @@ function renderBlocklistEntry(entry, withEnableButton) {
       : null;
     const targetBlocklistId = Array.isArray(firstBlocklist) ? Number(firstBlocklist[0]) : null;
     container.classList.add('blocklist-entry-link');
-    container.title = t('show-in-blocklist');
+    container.title = window._localization.t('show-in-blocklist');
     container.addEventListener('click', () => {
       if (typeof window.selectBlocklistEntryInBlocklist === 'function') {
         window.selectBlocklistEntryInBlocklist(
@@ -552,10 +554,10 @@ function statisticsFromRowEl(rowEl) {
 function renderInspectorStatistics(statistics) {
   const container = document.createElement('div');
   container.className = 'inspector-statistics';
-  addKeyValueLine(container, t('stats-bytes-received'), byteCountString(statistics.bytesReceived));
-  addKeyValueLine(container, t('stats-bytes-sent'),     byteCountString(statistics.bytesSent));
-  addKeyValueLine(container, t('stats-last-allowed'),   fullDateTimeString(statistics.lastAllowed));
-  addKeyValueLine(container, t('stats-last-denied'),    fullDateTimeString(statistics.lastBlocked));
+  addKeyValueLine(container, window._localization.t('stats-bytes-received'), byteCountString(statistics.bytesReceived));
+  addKeyValueLine(container, window._localization.t('stats-bytes-sent'),     byteCountString(statistics.bytesSent));
+  addKeyValueLine(container, window._localization.t('stats-last-allowed'),   fullDateTimeString(statistics.lastAllowed));
+  addKeyValueLine(container, window._localization.t('stats-last-denied'),    fullDateTimeString(statistics.lastBlocked));
   return container;
 }
 
@@ -571,7 +573,7 @@ function renderRowInspector(data) {
   container.className = 'row-inspector';
 
   if (data.row === null) {
-    addKeyValueLine(container, t('field-process'), t('all-processes'));
+    addKeyValueLine(container, window._localization.t('field-process'), window._localization.t('all-processes'));
     return container;
   }
 
@@ -579,32 +581,32 @@ function renderRowInspector(data) {
   if (data.primaryExecutable) {
     addKeyValueLine(
       container,
-      t('field-process'),
+      window._localization.t('field-process'),
       data.primaryExecutable,
       { path: true, via: !!data.viaExecutable, viaValue: data.viaExecutable }
     );
   } else {
-    addKeyValueLine(container, t('field-process'), t('unknown-executable'));
+    addKeyValueLine(container, window._localization.t('field-process'), window._localization.t('unknown-executable'));
   }
 
   /* Direction ------------------------------------------------- */
   if (typeof data.isInbound === 'boolean') {
-    addKeyValueLine(container, t('field-direction'), data.isInbound ? t('direction-inbound') : t('direction-outbound'));
+    addKeyValueLine(container, window._localization.t('field-direction'), data.isInbound ? window._localization.t('direction-inbound') : window._localization.t('direction-outbound'));
   }
 
   /* Remote ----------------------------------------------------- */
-  addKeyValueLine(container, t('field-remote'), data.remoteName?.value, { domain: data.remoteName?.type == 'domain' });
+  addKeyValueLine(container, window._localization.t('field-remote'), data.remoteName?.value, { domain: data.remoteName?.type == 'domain' });
 
   /* IP address ----------------------------------------------- */
-  addKeyValueLine(container, t('field-remote-address'), data.ipAddress);
+  addKeyValueLine(container, window._localization.t('field-remote-address'), data.ipAddress);
 
   /* Port / Protocol ------------------------------------------- */
-  const protoName = PROTOCOL_MAP[data.protocol] || t('proto-unknown', { n: data.protocol });
+  const protoName = PROTOCOL_MAP[data.protocol] || window._localization.t('proto-unknown', { n: data.protocol });
 
   if (data.port && data.port !== 0) {
-    addKeyValueLine(container, t('field-port'), `${protoName} ${data.port}`);
+    addKeyValueLine(container, window._localization.t('field-port'), `${protoName} ${data.port}`);
   } else if (data.port === 0) {
-    addKeyValueLine(container, t('field-protocol'), protoName);
+    addKeyValueLine(container, window._localization.t('field-protocol'), protoName);
   }
 
   return container;
@@ -777,6 +779,7 @@ function renderLastEventSpans() {
     span.textContent = text;
   }
 }
+window.renderLastEventSpans = renderLastEventSpans;
 
 // Refresh every 10 s — keeps age buckets current and also catches format
 // boundary crossings while Alt is held (e.g. event crossing the 24 h mark).
@@ -827,9 +830,9 @@ window.applyConnectionsSort = applyConnectionsSort;
 
 function getTrafficSortOptions() {
   return [
-    { key: 'totalData',         label: t('sort-total-traffic') },
-    { key: 'totalDataReceived', label: t('sort-bytes-in') },
-    { key: 'totalDataSent',     label: t('sort-bytes-out') },
+    { key: 'totalData',         label: window._localization.t('sort-total-traffic') },
+    { key: 'totalDataReceived', label: window._localization.t('sort-bytes-in') },
+    { key: 'totalDataSent',     label: window._localization.t('sort-bytes-out') },
   ];
 }
 
@@ -853,15 +856,15 @@ function renderConnectionsHeader(sort) {
     sort = window.app?.getConnectionsSort?.() ?? '';
   }
 
-  const trafficLabel = sort === 'totalDataReceived' ? t('col-traffic-in')
-    : sort === 'totalDataSent' ? t('col-traffic-out')
-    : t('col-traffic');
+  const trafficLabel = sort === 'totalDataReceived' ? window._localization.t('col-traffic-in')
+    : sort === 'totalDataSent' ? window._localization.t('col-traffic-out')
+    : window._localization.t('col-traffic');
 
   const columns = [
-    { col: 'connection', label: t('col-connection'), sortKey: 'name',          indicator: '▲' },
-    { col: 'rule',       label: t('col-rule'),        sortKey: null,            indicator: null },
+    { col: 'connection', label: window._localization.t('col-connection'), sortKey: 'name',          indicator: '▲' },
+    { col: 'rule',       label: window._localization.t('col-rule'),        sortKey: null,            indicator: null },
     { col: 'traffic',    label: trafficLabel,          sortKey: 'traffic-popup', indicator: '▼' },
-    { col: 'activity',   label: t('col-activity'),    sortKey: 'lastActivity',  indicator: '▲' },
+    { col: 'activity',   label: window._localization.t('col-activity'),    sortKey: 'lastActivity',  indicator: '▲' },
   ];
 
   const trafficActive = sort === 'totalData' || sort === 'totalDataReceived' || sort === 'totalDataSent';
@@ -916,6 +919,7 @@ function handleClear() {
   pendingSelectionRecovery = null;
   listEl.innerHTML = '';
 }
+window.handleClear = handleClear;
 
 function handleInsertRows(afterID, rows, animate) {
   const frag = document.createDocumentFragment();
@@ -971,7 +975,7 @@ function handleInsertRows(afterID, rows, animate) {
     }, { once: true });
   }
 }
-
+window.handleInsertRows = handleInsertRows;
 
 function handleRemoveRows(startID, endID) {
   let lastElement = document.getElementById(htmlID(endID));
@@ -1022,6 +1026,7 @@ function handleRemoveRows(startID, endID) {
   };
   firstElement.addEventListener('transitionend', onRemoveTransitionEnd);
 }
+window.handleRemoveRows = handleRemoveRows;
 
 function handleMoveRows(startID, endID, targetID) {
   let lastElement = document.getElementById(htmlID(endID));
@@ -1096,6 +1101,7 @@ function handleMoveRows(startID, endID, targetID) {
   }
 
 }
+window.handleMoveRows = handleMoveRows;
 
 function updateElement(rowEl, selector, text) {
   let span = rowEl.querySelector(selector);
@@ -1162,6 +1168,7 @@ function handleUpdateStatistics(statistics) {
     }
   }
 }
+window.handleUpdateStatistics = handleUpdateStatistics;
 
 function handleUpdateRows(rows) {
   for (const row of rows) {
@@ -1182,6 +1189,7 @@ function handleUpdateRows(rows) {
     }
   }
 }
+window.handleUpdateRows = handleUpdateRows;
 
 function attachRuleButton(rowEl, row) {
   const ruleButton = rowEl.querySelector('.rule-button');
@@ -1205,10 +1213,10 @@ function attachRuleButton(rowEl, row) {
         case 'denyByDefault':
           buttonText = '<svg width="14" height="14"><use href="#rule-deny" opacity="0.5"/></svg>';
           break;
-        case 'denyByRule':    
+        case 'denyByRule':
           buttonText = '<svg width="14" height="14"><use href="#rule-deny"/></svg>';
           break;
-        case 'denyByBlocklist': 
+        case 'denyByBlocklist':
           buttonText = '<svg width="14" height="14"><use href="#rule-blocklist"/></svg>';
           break;
         default:
@@ -1237,6 +1245,7 @@ function handleUpdateRuleButtons(rows) {
     attachRuleButton(el, row);
   }
 }
+window.handleUpdateRuleButtons = handleUpdateRuleButtons;
 
 let _scrollRafId = null;
 
@@ -1316,6 +1325,7 @@ function highlightRuleButtons(rowIds, action) {
 
   setTimeout(doScroll, 200);
 }
+window.highlightRuleButtons = highlightRuleButtons;
 
 // Per-row flash state: rowId -> { allow: {start} | null, deny: {start} | null, rafId: number | null }
 const _flashState = new Map();
@@ -1441,6 +1451,7 @@ function handleEvents(events) {
     }
   }
 }
+window.handleEvents = handleEvents;
 
 function handleSetInspector(msg) {
   setRowSelected(msg.row);
@@ -1461,7 +1472,7 @@ function handleSetInspector(msg) {
 
   const headline = document.createElement('div');
   headline.className = 'covering-rules-headline';
-  headline.textContent = t('matching-rules');
+  headline.textContent = window._localization.t('matching-rules');
   rulesTable.appendChild(headline);
 
   const defaultRule = document.createElement('div');
@@ -1481,8 +1492,8 @@ function handleSetInspector(msg) {
   const text = document.createElement('span');
   text.className = 'host';
   text.textContent = msg.defaultAction.toLowerCase() === 'allow'
-    ? t('default-allow')
-    : t('default-deny');
+    ? window._localization.t('default-allow')
+    : window._localization.t('default-deny');
   defaultRule.appendChild(text);
 
   defaultRule.classList.add('inactive');
@@ -1507,7 +1518,7 @@ function handleSetInspector(msg) {
   if (msg.relatedRules && msg.relatedRules.length > 0) {
     const headline = document.createElement('div');
     headline.className = 'related-rules-headline';
-    headline.textContent = t('related-rules');
+    headline.textContent = window._localization.t('related-rules');
     rulesTable.appendChild(headline);
     msg.relatedRules.forEach(r => {
       let line;
@@ -1521,3 +1532,4 @@ function handleSetInspector(msg) {
     });
   }
 }
+window.handleSetInspector = handleSetInspector;

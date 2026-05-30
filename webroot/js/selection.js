@@ -156,3 +156,5 @@ function createMultiSelection(config) {
     },
   };
 }
+
+window.createMultiSelection = createMultiSelection;

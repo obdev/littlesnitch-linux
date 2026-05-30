@@ -26,7 +26,7 @@ let addUserEntriesDialog = null;
 let addUserEntriesError = null;
 let addUserEntriesText = null;
 let addUserEntriesNamesAreHosts = null;
-const userEntrySelection = createMultiSelection({
+const userEntrySelection = window.createMultiSelection({
   getCount: () => {
     const d = ensureBlocklistDetails(getSelectedBlocklistId());
     return d ? d.totalEntries : 0;
@@ -45,54 +45,54 @@ let pendingScrollToAdded = false; // scroll to the first newly added entry once
 
 function getUpdatePeriodPresetOptions() {
   return [
-    { minutes: 60,    label: t('update-every-hour') },
-    { minutes: 360,   label: t('update-every-6-hours') },
-    { minutes: 1440,  label: t('update-every-day') },
-    { minutes: 10080, label: t('update-every-week') },
+    { minutes: 60,    label: window._localization.t('update-every-hour') },
+    { minutes: 360,   label: window._localization.t('update-every-6-hours') },
+    { minutes: 1440,  label: window._localization.t('update-every-day') },
+    { minutes: 10080, label: window._localization.t('update-every-week') },
   ];
 }
 
 function blocklistPresets() {
   return [
     {
-      name: t('preset-name-none'),
+      name: window._localization.t('preset-name-none'),
       description: '',
       url: '',
       namesAreHosts: false
     },
     {
       name: 'Peter Lowe',
-      description: t('preset-description-lowe'),
+      description: window._localization.t('preset-description-lowe'),
       url: 'https://pgl.yoyo.org/adservers/serverlist.php?hostformat=plain&mimetype=plaintext',
       namesAreHosts: false
     },
     {
       name: 'Hagezi Multi PRO',
-      description: t('preset-description-hagezi-pro'),
+      description: window._localization.t('preset-description-hagezi-pro'),
       url: 'https://cdn.jsdelivr.net/gh/hagezi/dns-blocklists@latest/wildcard/pro.txt',
       namesAreHosts: false
     },
     {
       name: 'Hagezi Threat Intelligence Medium',
-      description: t('preset-description-hagezi-threat'),
+      description: window._localization.t('preset-description-hagezi-threat'),
       url: 'https://cdn.jsdelivr.net/gh/hagezi/dns-blocklists@latest/wildcard/tif.medium-onlydomains.txt',
       namesAreHosts: false
     },
     {
       name: 'OISD.nl',
-      description: t('preset-description-oisd'),
+      description: window._localization.t('preset-description-oisd'),
       url: 'https://big.oisd.nl/domainswild2',
       namesAreHosts: false
     },
     {
       name: '1Hosts Lite',
-      description: t('preset-description-1hosts'),
+      description: window._localization.t('preset-description-1hosts'),
       url: 'https://github.com/badmojr/1Hosts/raw/master/Lite/domains.txt',
       namesAreHosts: false
     },
     {
       name: 'FireHOL Level 1',
-      description: t('preset-description-firehol'),
+      description: window._localization.t('preset-description-firehol'),
       url: 'https://iplists.firehol.org/files/firehol_level1.netset',
       namesAreHosts: false
     }
@@ -145,7 +145,7 @@ function setBlocklistsSearchQuery(query) {
 }
 
 function getEmptyEntriesText() {
-  return getBlocklistsSearchQuery().length > 0 ? t('empty-no-matching-entries') : t('empty-no-entries');
+  return getBlocklistsSearchQuery().length > 0 ? window._localization.t('empty-no-matching-entries') : window._localization.t('empty-no-entries');
 }
 
 function getSelectedBlocklistId() {
@@ -303,6 +303,7 @@ function handleSetBlocklistEntryLocation(msg) {
   renderBlocklistDetails();
   tryCompletePendingLocate();
 }
+window.handleSetBlocklistEntryLocation = handleSetBlocklistEntryLocation;
 
 function setAddBlocklistError(message) {
   if (!addBlocklistError) {
@@ -332,7 +333,7 @@ function submitAddUserEntriesModal() {
     .map((line) => line.trim())
     .filter((line) => line.length > 0);
   if (entries.length === 0) {
-    setAddUserEntriesError(t('err-add-at-least-one'));
+    setAddUserEntriesError(window._localization.t('err-add-at-least-one'));
     addUserEntriesText.focus();
     return;
   }
@@ -363,12 +364,12 @@ function ensureUserEntriesDialog() {
 
   const title = document.createElement('h2');
   title.className = 'edit-dialog-title';
-  title.textContent = t('dlg-add-entries-title');
+  title.textContent = window._localization.t('dlg-add-entries-title');
   form.appendChild(title);
 
   const entriesLabel = document.createElement('label');
   entriesLabel.className = 'edit-dialog-label';
-  entriesLabel.textContent = t('dlg-entries-label');
+  entriesLabel.textContent = window._localization.t('dlg-entries-label');
   const entriesInput = document.createElement('textarea');
   entriesInput.className = 'edit-dialog-textarea';
   entriesInput.name = 'entries';
@@ -382,7 +383,7 @@ function ensureUserEntriesDialog() {
   namesAreHostsInput.type = 'checkbox';
   namesAreHostsInput.name = 'namesAreHosts';
   namesAreHostsLabel.appendChild(namesAreHostsInput);
-  namesAreHostsLabel.appendChild(document.createTextNode(t('dlg-names-are-hosts')));
+  namesAreHostsLabel.appendChild(document.createTextNode(window._localization.t('dlg-names-are-hosts')));
   form.appendChild(namesAreHostsLabel);
 
   const error = document.createElement('div');
@@ -395,14 +396,14 @@ function ensureUserEntriesDialog() {
   const cancelButton = document.createElement('button');
   cancelButton.type = 'button';
   cancelButton.className = 'edit-dialog-button';
-  cancelButton.textContent = t('btn-cancel');
+  cancelButton.textContent = window._localization.t('btn-cancel');
   cancelButton.addEventListener('click', () => dialog.close());
   actions.appendChild(cancelButton);
 
   const addButton = document.createElement('button');
   addButton.type = 'submit';
   addButton.className = 'edit-dialog-button is-primary';
-  addButton.textContent = t('btn-add');
+  addButton.textContent = window._localization.t('btn-add');
   actions.appendChild(addButton);
 
   form.appendChild(actions);
@@ -463,12 +464,12 @@ function submitBlocklistModal() {
     : 1440;
 
   if (name.length === 0) {
-    setAddBlocklistError(t('err-name-required'));
+    setAddBlocklistError(window._localization.t('err-name-required'));
     addBlocklistName.focus();
     return;
   }
   if (updateFromUrl.length === 0) {
-    setAddBlocklistError(t('err-url-required'));
+    setAddBlocklistError(window._localization.t('err-url-required'));
     addBlocklistUrl.focus();
     return;
   }
@@ -477,17 +478,17 @@ function submitBlocklistModal() {
   try {
     parsedUrl = new URL(updateFromUrl);
   } catch (_error) {
-    setAddBlocklistError(t('err-url-invalid'));
+    setAddBlocklistError(window._localization.t('err-url-invalid'));
     addBlocklistUrl.focus();
     return;
   }
   if (parsedUrl.protocol !== 'http:' && parsedUrl.protocol !== 'https:') {
-    setAddBlocklistError(t('err-url-http-only'));
+    setAddBlocklistError(window._localization.t('err-url-http-only'));
     addBlocklistUrl.focus();
     return;
   }
   if (!Number.isFinite(updatePeriodMinutes) || updatePeriodMinutes <= 0) {
-    setAddBlocklistError(t('err-update-period-invalid'));
+    setAddBlocklistError(window._localization.t('err-update-period-invalid'));
     addBlocklistUpdatePeriod?.focus();
     return;
   }
@@ -533,12 +534,12 @@ function ensureAddBlocklistDialog() {
 
   const title = document.createElement('h2');
   title.className = 'edit-dialog-title';
-  title.textContent = t('dlg-add-blocklist-title');
+  title.textContent = window._localization.t('dlg-add-blocklist-title');
   form.appendChild(title);
 
   const presetLabel = document.createElement('label');
   presetLabel.className = 'edit-dialog-label';
-  presetLabel.textContent = t('preset-label');
+  presetLabel.textContent = window._localization.t('preset-label');
   const presetSelect = document.createElement('select');
   presetSelect.className = 'edit-dialog-select';
   presetSelect.name = 'preset';
@@ -566,7 +567,7 @@ function ensureAddBlocklistDialog() {
 
   const nameLabel = document.createElement('label');
   nameLabel.className = 'edit-dialog-label';
-  nameLabel.textContent = t('dlg-name-label');
+  nameLabel.textContent = window._localization.t('dlg-name-label');
   const nameInput = document.createElement('input');
   nameInput.className = 'edit-dialog-input';
   nameInput.type = 'text';
@@ -577,7 +578,7 @@ function ensureAddBlocklistDialog() {
 
   const descriptionLabel = document.createElement('label');
   descriptionLabel.className = 'edit-dialog-label';
-  descriptionLabel.textContent = t('dlg-description-label');
+  descriptionLabel.textContent = window._localization.t('dlg-description-label');
   const descriptionInput = document.createElement('textarea');
   descriptionInput.className = 'edit-dialog-textarea';
   descriptionInput.name = 'description';
@@ -587,7 +588,7 @@ function ensureAddBlocklistDialog() {
 
   const urlLabel = document.createElement('label');
   urlLabel.className = 'edit-dialog-label';
-  urlLabel.textContent = t('dlg-url-label');
+  urlLabel.textContent = window._localization.t('dlg-url-label');
   const urlInput = document.createElement('input');
   urlInput.className = 'edit-dialog-input';
   urlInput.type = 'url';
@@ -603,12 +604,12 @@ function ensureAddBlocklistDialog() {
   namesAreHostsInput.type = 'checkbox';
   namesAreHostsInput.name = 'namesAreHosts';
   namesAreHostsLabel.appendChild(namesAreHostsInput);
-  namesAreHostsLabel.appendChild(document.createTextNode(t('dlg-treat-as-hostnames')));
+  namesAreHostsLabel.appendChild(document.createTextNode(window._localization.t('dlg-treat-as-hostnames')));
   form.appendChild(namesAreHostsLabel);
 
   const updatePeriodLabel = document.createElement('label');
   updatePeriodLabel.className = 'edit-dialog-label';
-  updatePeriodLabel.textContent = t('dlg-update-period-label');
+  updatePeriodLabel.textContent = window._localization.t('dlg-update-period-label');
   const updatePeriodSelect = document.createElement('select');
   updatePeriodSelect.className = 'edit-dialog-select';
   updatePeriodSelect.name = 'updatePeriodMinutes';
@@ -625,14 +626,14 @@ function ensureAddBlocklistDialog() {
   const cancelButton = document.createElement('button');
   cancelButton.type = 'button';
   cancelButton.className = 'edit-dialog-button';
-  cancelButton.textContent = t('btn-cancel');
+  cancelButton.textContent = window._localization.t('btn-cancel');
   cancelButton.addEventListener('click', () => dialog.close());
   actions.appendChild(cancelButton);
 
   const addButton = document.createElement('button');
   addButton.type = 'submit';
   addButton.className = 'edit-dialog-button is-primary';
-  addButton.textContent = t('btn-add');
+  addButton.textContent = window._localization.t('btn-add');
   actions.appendChild(addButton);
 
   form.appendChild(actions);
@@ -665,8 +666,8 @@ function openBlocklistModal(blocklist) {
   if (blocklist) {
     editBlocklistId = blocklist.id;
     addBlocklistPresetRow.style.display = 'none';
-    addBlocklistTitle.textContent = t('dlg-edit-blocklist-title');
-    addBlocklistConfirm.textContent = t('btn-save');
+    addBlocklistTitle.textContent = window._localization.t('dlg-edit-blocklist-title');
+    addBlocklistConfirm.textContent = window._localization.t('btn-save');
     addBlocklistName.value = blocklist.name || '';
     addBlocklistDescription.value = blocklist.description || '';
     addBlocklistUrl.value = blocklist.updateFromUrl || '';
@@ -675,8 +676,8 @@ function openBlocklistModal(blocklist) {
   } else {
     editBlocklistId = null;
     addBlocklistPresetRow.style.display = '';
-    addBlocklistTitle.textContent = t('dlg-add-blocklist-title');
-    addBlocklistConfirm.textContent = t('btn-add');
+    addBlocklistTitle.textContent = window._localization.t('dlg-add-blocklist-title');
+    addBlocklistConfirm.textContent = window._localization.t('btn-add');
     addBlocklistDialog.querySelector('form')?.reset();
     setUpdatePeriodOptions(1440);
   }
@@ -695,7 +696,7 @@ function setupBlocklistHeaderAddButton() {
   title.classList.add('blocklist-pane-title');
 
   const label = document.createElement('span');
-  label.textContent = title.textContent || t('blocklists-header');
+  label.textContent = title.textContent || window._localization.t('blocklists-header');
   title.textContent = '';
   title.appendChild(label);
 
@@ -703,8 +704,8 @@ function setupBlocklistHeaderAddButton() {
   addButton.type = 'button';
   addButton.className = 'blocklist-add-button';
   addButton.setAttribute('data-role', 'add-blocklist');
-  addButton.setAttribute('aria-label', t('btn-add-blocklist'));
-  addButton.title = t('btn-add-blocklist');
+  addButton.setAttribute('aria-label', window._localization.t('btn-add-blocklist'));
+  addButton.title = window._localization.t('btn-add-blocklist');
   addButton.innerHTML = '<svg width="14" height="14" fill="currentColor"><use href="#btn-add"/></svg>';
   addButton.addEventListener('click', () => {
     openBlocklistModal(null);
@@ -725,7 +726,7 @@ function setupBlocklistDetailsHeaderAddButton() {
     title.classList.add('blocklist-pane-title');
 
     const label = document.createElement('span');
-    label.textContent = title.textContent || t('blocklist-details-header');
+    label.textContent = title.textContent || window._localization.t('blocklist-details-header');
     title.textContent = '';
     title.appendChild(label);
 
@@ -738,8 +739,8 @@ function setupBlocklistDetailsHeaderAddButton() {
     addButton.type = 'button';
     addButton.className = 'blocklist-add-button';
     addButton.setAttribute('data-role', 'add-user-entries');
-    addButton.setAttribute('aria-label', t('btn-add-entries'));
-    addButton.title = t('btn-add-entries');
+    addButton.setAttribute('aria-label', window._localization.t('btn-add-entries'));
+    addButton.title = window._localization.t('btn-add-entries');
     addButton.innerHTML = '<svg width="14" height="14" fill="currentColor"><use href="#btn-add"/></svg>';
     addButton.hidden = true;
     addButton.addEventListener('click', () => {
@@ -751,8 +752,8 @@ function setupBlocklistDetailsHeaderAddButton() {
     removeButton.type = 'button';
     removeButton.className = 'blocklist-add-button';
     removeButton.setAttribute('data-role', 'remove-user-entries');
-    removeButton.setAttribute('aria-label', t('btn-remove-entries'));
-    removeButton.title = t('btn-remove-entries');
+    removeButton.setAttribute('aria-label', window._localization.t('btn-remove-entries'));
+    removeButton.title = window._localization.t('btn-remove-entries');
     removeButton.innerHTML = '<svg width="18" height="18" fill="currentColor"><use href="#btn-remove"/></svg>';
     removeButton.hidden = true;
     removeButton.disabled = true;
@@ -792,7 +793,7 @@ function formatEntryTitle(entry) {
 }
 
 function formatLocalTime(secondsSinceEpoch) {
-  return formatDateTime(Number(secondsSinceEpoch));
+  return window.formatDateTime(Number(secondsSinceEpoch));
 }
 
 function normalizeUpdatePeriodMinutes(value) {
@@ -806,23 +807,23 @@ function normalizeUpdatePeriodMinutes(value) {
 function formatUpdatePeriodForDisplay(minutesValue) {
   const minutes = normalizeUpdatePeriodMinutes(minutesValue);
   if (minutes === 60) {
-    return t('update-every-hour');
+    return window._localization.t('update-every-hour');
   }
   if (minutes === 360) {
-    return t('update-every-6-hours');
+    return window._localization.t('update-every-6-hours');
   }
   if (minutes === 1440) {
-    return t('update-every-day');
+    return window._localization.t('update-every-day');
   }
   if (minutes === 10080) {
-    return t('update-every-week');
+    return window._localization.t('update-every-week');
   }
   if (minutes < 120) {
-    return t('update-every-minutes', { n: minutes });
+    return window._localization.t('update-every-minutes', { n: minutes });
   } else if (minutes < 2880) {
-    return t('update-every-hours', { n: Math.round(minutes / 60) });
+    return window._localization.t('update-every-hours', { n: Math.round(minutes / 60) });
   } else {
-    return t('update-every-days', { n: Math.round(minutes / 1440) });
+    return window._localization.t('update-every-days', { n: Math.round(minutes / 1440) });
   }
 }
 
@@ -910,7 +911,7 @@ function renderBlocklist(blocklist) {
   enabledCheckbox.className = 'blocklist-card-checkbox';
   enabledCheckbox.checked = blocklist.disabled !== true;
   enabledCheckbox.disabled = blocklist.id < 0;
-  enabledCheckbox.title = blocklist.disabled !== true ? t('enabled') : t('disabled');
+  enabledCheckbox.title = blocklist.disabled !== true ? window._localization.t('enabled') : window._localization.t('disabled');
   enabledCheckbox.addEventListener('click', (event) => {
     event.stopPropagation();
   });
@@ -950,7 +951,7 @@ function renderBlocklist(blocklist) {
     const editButton = document.createElement('button');
     editButton.type = 'button';
     editButton.className = 'blocklist-card-btn';
-    editButton.title = t('btn-edit-blocklist');
+    editButton.title = window._localization.t('btn-edit-blocklist');
     editButton.textContent = '✎';
     editButton.addEventListener('click', (event) => {
       event.stopPropagation();
@@ -961,7 +962,7 @@ function renderBlocklist(blocklist) {
     const deleteButton = document.createElement('button');
     deleteButton.type = 'button';
     deleteButton.className = 'blocklist-card-btn blocklist-card-btn-danger';
-    deleteButton.title = t('btn-delete-blocklist');
+    deleteButton.title = window._localization.t('btn-delete-blocklist');
     deleteButton.textContent = '×';
     deleteButton.addEventListener('click', (event) => {
       event.stopPropagation();
@@ -1076,7 +1077,7 @@ function renderEntryRow(entry, index) {
   checkbox.type = 'checkbox';
   checkbox.className = 'blocklist-entry-checkbox';
   checkbox.checked = !entry.isDisabled;
-  checkbox.title = entry.isDisabled ? t('disabled') : t('enabled');
+  checkbox.title = entry.isDisabled ? window._localization.t('disabled') : window._localization.t('enabled');
   checkbox.addEventListener('click', (event) => {
     event.stopPropagation();
   });
@@ -1102,7 +1103,7 @@ function renderEntryRow(entry, index) {
   title.appendChild(valueSpan);
 
   if (Array.isArray(entry.blocklists) && entry.blocklists.length > 0) {
-    appendBlocklistNamesInfo(title, entry.blocklists.map(id => blocklistsById.get(id)?.name).filter(Boolean));
+    window.appendBlocklistNamesInfo(title, entry.blocklists.map(id => blocklistsById.get(id)?.name).filter(Boolean));
   }
 
   row.appendChild(title);
@@ -1133,7 +1134,7 @@ function renderPlaceholderRow() {
 
   const label = document.createElement('div');
   label.className = 'blocklist-entry-title';
-  label.textContent = t('loading');
+  label.textContent = window._localization.t('loading');
   row.appendChild(label);
 
   return row;
@@ -1266,7 +1267,7 @@ function renderBlocklistPropertiesCard(blocklist) {
   if (blocklist.description && blocklist.description.trim().length > 0) {
     const descBox = document.createElement('div');
     descBox.className = 'inspector-box';
-    setHighlightedText(descBox, blocklist.description);
+    window.setHighlightedText(descBox, blocklist.description);
     card.appendChild(descBox);
   }
 
@@ -1276,7 +1277,7 @@ function renderBlocklistPropertiesCard(blocklist) {
     const grid = document.createElement('div');
     grid.className = 'inspector-grid';
 
-    appendInspectorRow(grid, t('field-update'),
+    appendInspectorRow(grid, window._localization.t('field-update'),
       formatUpdatePeriodForDisplay(blocklist.updatePeriodMinutes), { plain: true });
 
     const lastUpdateSec = Number(blocklist.lastUpdate ?? 0);
@@ -1288,16 +1289,16 @@ function renderBlocklistPropertiesCard(blocklist) {
 
     if (hasError) {
       const failedValue = (hasLastUpdate ? formatLocalTime(lastUpdateSec) + ': ' : '') + lastUpdateError;
-      appendInspectorRow(grid, t('field-update-failed'), failedValue,
+      appendInspectorRow(grid, window._localization.t('field-update-failed'), failedValue,
         { plain: true, rowClass: 'blocklist-update-row-error' });
-      appendInspectorRow(grid, t('field-last-success'),
-        hasLastSuccessful ? formatLocalTime(lastSuccessfulSec) : t('never'), { plain: true });
+      appendInspectorRow(grid, window._localization.t('field-last-success'),
+        hasLastSuccessful ? formatLocalTime(lastSuccessfulSec) : window._localization.t('never'), { plain: true });
     } else {
-      appendInspectorRow(grid, t('field-last-update'),
-        hasLastUpdate ? formatLocalTime(lastUpdateSec) : t('never'), { plain: true });
+      appendInspectorRow(grid, window._localization.t('field-last-update'),
+        hasLastUpdate ? formatLocalTime(lastUpdateSec) : window._localization.t('never'), { plain: true });
     }
 
-    appendInspectorRow(grid, t('field-url'), blocklist.updateFromUrl,
+    appendInspectorRow(grid, window._localization.t('field-url'), blocklist.updateFromUrl,
       { plain: true, valueClass: 'blocklist-inspector-url' });
 
     card.appendChild(grid);
@@ -1319,7 +1320,7 @@ function renderBlocklistDetails() {
   if (activeDetailsBlocklistId === selectedId && activeVirtualList) {
     const count = detailsContainer.querySelector('.blocklist-detail-count');
     if (count) {
-      count.textContent = t('entry-count', { n: (details.totalEntries || 0).toLocaleString() });
+      count.textContent = window._localization.t('entry-count', { n: (details.totalEntries || 0).toLocaleString() });
     }
     const headerEl = activeVirtualList.headerEl;
     if (headerEl) {
@@ -1356,7 +1357,7 @@ function renderBlocklistDetails() {
 
   const headline = document.createElement('div');
   headline.className = 'blocklist-detail-headline';
-  headline.textContent = t('blocked-entries');
+  headline.textContent = window._localization.t('blocked-entries');
   headlineRow.appendChild(headline);
 
   const count = document.createElement('div');
@@ -1529,6 +1530,7 @@ function handleSetBlocklists(msg) {
 
   applySetBlocklists(msg);
 }
+window.handleSetBlocklists = handleSetBlocklists;
 
 function handleSetBlocklistDetails(msg) {
   const blocklistId = msg.blocklistId;
@@ -1551,6 +1553,7 @@ function handleSetBlocklistDetails(msg) {
     tryCompletePendingLocate();
   }
 }
+window.handleSetBlocklistDetails = handleSetBlocklistDetails;
 
 function handleSetBlocklistEntries(msg) {
   const blocklistId = msg.blocklistId;
@@ -1599,6 +1602,7 @@ function handleSetBlocklistEntries(msg) {
     tryCompletePendingLocate();
   }
 }
+window.handleSetBlocklistEntries = handleSetBlocklistEntries;
 
 setupBlocklistHeaderAddButton();
 setupBlocklistDetailsHeaderAddButton();
