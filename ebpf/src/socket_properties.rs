@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-2.0
 // Copyright (C) 2026 Objective Development Software GmbH
 
-use crate::{context::StaticBuffers, current_executable::get_current_process_pair};
+use crate::{context::{ConcurrencyGroup, StaticBuffers}, current_executable::get_current_process_pair};
 use aya_ebpf::{macros::map, maps::HashMap};
 use common::flow_types::SocketProperties;
 
@@ -9,12 +9,12 @@ use common::flow_types::SocketProperties;
 static SOCKET_PROPERTIES: HashMap<u64, SocketProperties> = HashMap::with_max_entries(65536, 0);
 
 /// registers socket if we can obtain a process pair
-pub fn socket_opened(cookie: u64) {
+fn cache_current_process(cookie: u64, concurrency_group: ConcurrencyGroup) {
     if cookie == 0 {
         // not a valid cookie
         return;
     }
-    let buffers = StaticBuffers::get(crate::context::ConcurrencyGroup::CgroupSockCreate);
+    let buffers = StaticBuffers::get(concurrency_group);
     if buffers.is_null() {
         return;
     }
@@ -27,6 +27,10 @@ pub fn socket_opened(cookie: u64) {
     }
 }
 
+pub fn socket_opened(cookie: u64) {
+    cache_current_process(cookie, ConcurrencyGroup::CgroupSockCreate);
+}
+
 pub fn socket_closed(cookie: u64) {
     // We can remove the entry from `SOCKET_PROPERTIES` although it may still be used by active
     // flows because the flow has copied everything it needs from the SocketProperties. If
@@ -36,16 +40,20 @@ pub fn socket_closed(cookie: u64) {
     _ = SOCKET_PROPERTIES.remove(&cookie);
 }
 
+/// Obtains socket properties (including repsonsible process) from cache. If no cached entry is
+/// found and `register_using_group` is `Some`, then it tries to create a new entry from the
+/// current process. Since a buffer is needed for obtaining the current process, a concurrency
+/// group for this buffer (matching the hooked function) must be given.
 pub fn get_socket_properties(
     cookie: u64,
-    register_on_demand: bool,
+    register_using_group: Option<ConcurrencyGroup>,
 ) -> Option<&'static SocketProperties> {
     if cookie == 0 {
         None
     } else if let Some(props) = unsafe { SOCKET_PROPERTIES.get(&cookie) } {
         Some(props)
-    } else if register_on_demand {
-        socket_opened(cookie);
+    } else if let Some(group) = register_using_group {
+        cache_current_process(cookie, group);
         unsafe { SOCKET_PROPERTIES.get(&cookie) }
     } else {
         None

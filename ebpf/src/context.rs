@@ -28,7 +28,9 @@ pub enum ConcurrencyGroup {
     CgroupSkbIn = 0,
     CgroupSkbOut = 1,
     CgroupSockCreate = 2,
-    FentryExec = 3,
+    CgroupSockConnect = 3,
+    CgroupSendMsg = 4,
+    FentryExec = 5,
     // If you extend, also extend max entries of `BUFFERS` below.
 }
 

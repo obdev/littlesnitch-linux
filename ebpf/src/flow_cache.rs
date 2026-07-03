@@ -2,8 +2,12 @@
 // Copyright (C) 2026 Objective Development Software GmbH
 
 use crate::{
-    FilterEngineConnection, context::Context, dns_cache::name_for_address,
-    event_queue::enqueue_event, ip_parser::HeaderInfos, kernel_filter_model::KernelFilterModel,
+    FilterEngineConnection,
+    context::{ConcurrencyGroup, Context},
+    dns_cache::name_for_address,
+    event_queue::enqueue_event,
+    ip_parser::HeaderInfos,
+    kernel_filter_model::KernelFilterModel,
     socket_properties::get_socket_properties,
 };
 use aya_ebpf::{
@@ -55,12 +59,16 @@ impl Context {
             // Inbound packets are often not yet associated with a socket and process.
             // In both cases the current process may be any running process not related to the
             // network packet.
-            let register_on_demand = !self.is_inbound
+            let group = if !self.is_inbound
                 && payload != 0
                 && !(identifier.protocol == IpProto::Icmp as _
-                    || identifier.protocol == IpProto::Ipv6Icmp as _);
-            if let Some(socket_properties) =
-                get_socket_properties(properties.socket_cookie, register_on_demand)
+                    || identifier.protocol == IpProto::Ipv6Icmp as _)
+            {
+                Some(ConcurrencyGroup::CgroupSkbOut)
+            } else {
+                None
+            };
+            if let Some(socket_properties) = get_socket_properties(properties.socket_cookie, group)
             {
                 properties.process_pair = socket_properties.owner.clone();
                 if properties.process_pair.is_known() {

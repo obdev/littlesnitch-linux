@@ -31,7 +31,7 @@ mod unique_id;
 
 use crate::{
     co_re::*,
-    context::Context,
+    context::{ConcurrencyGroup, Context},
     current_executable::{
         report_exec_attempt_with_path, report_exec_completed, report_sched_process_exec,
         report_sched_process_exit, report_sched_process_fork,
@@ -287,7 +287,12 @@ fn handle_sock_addr(addr: *mut bpf_sock_addr, is_ipv6: bool, is_sendmsg: bool) -
     // Only called for outgoing packets.
     // If this is a sendmsg() call, we could, in principle, get the local address and port.
     let cookie = unsafe { bpf_get_socket_cookie(addr as _) };
-    if let Some(properties) = get_socket_properties(cookie, true) {
+    let group = if is_sendmsg {
+        ConcurrencyGroup::CgroupSendMsg
+    } else {
+        ConcurrencyGroup::CgroupSockConnect
+    };
+    if let Some(properties) = get_socket_properties(cookie, Some(group)) {
         let addr = unsafe { &*addr };
         if !is_sendmsg && addr.protocol == IpProto::Udp as u32 {
             // This is a connect() call for UDP. Register the socket and executable, but do not
