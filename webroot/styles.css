@@ -31,9 +31,9 @@
   /* ── Row / header layout tokens ─────────────────────── */
   --pane-hdr-h: 36px;
   --row-h: 32px;
-  --row-hover-bg: var(--hover);
+  --row-hover-bg: rgba(0,0,0, 0.045);           /* lighter than --hover: keeps hover clearly weaker than selection */
   --row-selected-bg: var(--accent-soft);
-  --row-selected-hover-bg: var(--hover);
+  --row-selected-hover-bg: #d5e8fb;              /* selected + hovered: deeper blue than --row-selected-bg */
 
   --selection-border: #8dbce6;
   --chart-select-bg: rgba(13, 106, 191, 0.12);
@@ -118,6 +118,8 @@ html.dark {
   --accent: #4d9de0;
   --accent-soft: #1a2d45;
   --accent-border: #2e5a8a;
+  --row-hover-bg: rgba(255,255,255, 0.05);       /* lighter than --hover: keeps hover clearly weaker than selection */
+  --row-selected-hover-bg: #234066;              /* selected + hovered: brighter blue than --row-selected-bg */
   --shadow: 0 4px 22px rgba(0, 0, 0, 0.4);
   --chart-select-bg: rgba(77, 157, 224, 0.25);
 
